@@ -1,0 +1,46 @@
+.app-container {
+
+}
+
+#index-container {
+  max-width: 1540px;
+  margin: 0 auto;
+  color: #666666;
+  padding: 80px 16px 16px 16px;
+
+  #wrapper {
+    position: relative;
+    margin:  0 auto;
+    max-width: 1400px;
+  }
+
+  .arrow {
+    position: absolute;
+    top: 50%;
+    margin-top: -32px;
+    font-size: 64px;
+    color: rgba(34,36,48,1);
+    font-family: arial, sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    width:40px;
+    height:150px;
+    border:1px solid rgba(34,36,48,1);
+    opacity:0.2;
+    border-radius:6px;
+    line-height: 130px;
+    text-align: center;
+  }
+
+  #prev {
+    left: 40px;
+  }
+
+  #next {
+    right: 40px;
+  }
+}

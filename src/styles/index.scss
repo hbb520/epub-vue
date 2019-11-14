@@ -1,0 +1,158 @@
+@import './mixin.scss';
+@import './size.scss';
+
+* {
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  vertical-align: baseline;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  font-family: "PingFangSC-Regular", "Microsoft YaHei", "Hiragino Sans GB", tahoma, Arial, "\5B8B\4F53", "STHeiti", "WenQuanYi Micro Hei", SimSun, sans-serif;
+  font-size: 14px;
+  line-height: 1;
+  color: #333;
+  word-wrap: break-word;
+  overflow: hidden;
+}
+
+input, select, button {
+  font-size: 100%;
+  outline: 0;
+  vertical-align: middle;
+  -webkit-appearance: none;
+}
+
+button {
+  border: 0;
+  background-clip: padding-box;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+ol, ul, li {
+  list-style: none;
+}
+
+/* 定义图片边框，当图片作为链接内容被填充时，会有默认边框出现，重定义掉 */
+img {
+  border: none;
+  vertical-align: baseline;
+}
+
+html, body {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  outline: none;
+  text-decoration: none;
+}
+
+div:focus {
+  outline: none;
+}
+
+a:focus,
+a:active {
+  outline: none;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+.c-p {
+  cursor: pointer;
+}
+
+.fl {
+  float: left;
+}
+
+.fr {
+  float: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.clearfix {
+  &:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+  }
+}
+
+.text-6 {
+  color: #666;
+}
+
+.text-3 {
+  color: #333;
+}
+
+.text-9 {
+  color: #999;
+}
+
+.text-primary {
+  color: #2365F1;
+}
+
+.text-success {
+  color: #04B600;
+}
+
+.text-warning {
+  color: #FF9B00;
+}
+
+.text-danger {
+  color: #E74324;
+}
+
+.bc-info {
+  background: rgba(238, 238, 238, 1) !important;
+  color: #333333 !important;
+}
+
+.border-none {
+  border: none !important;
+}
+
+
+.app-container {
+  width: 100%;
+  height: 100%;
+}

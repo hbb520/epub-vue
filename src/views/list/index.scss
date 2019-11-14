@@ -1,0 +1,46 @@
+.app-container {
+
+}
+
+#book-list-containe {
+  max-width: 1540px;
+  margin: 0 auto;
+  color: #666666;
+  padding: 80px 16px 16px 16px;
+
+  .book-list-ul {
+    margin-left: -68px;
+
+    .item {
+      position: relative;
+      cursor: pointer;
+      float: left;
+      width: 200px;
+      margin-left: 62px;
+      margin-bottom: 70px;
+      .img-box {
+        width: 200px;
+        height: 280px;
+        margin-bottom: 19px;
+        background-image: url("../../../static/imgs/book.png");
+        background-size: cover;
+      }
+      .book-name{
+        text-align: center;
+        font-size:18px;
+        font-family:Source Han Sans CN;
+        font-weight:400;
+        color:rgba(102,102,102,1);
+        line-height:40px;
+      }
+    }
+    .item:hover, .item:active{
+      .img-box{
+        box-shadow:0px 0px 10px 0px rgba(0,61,202,0.6);
+      }
+      .book-name{
+        color: #223FEE;
+      }
+    }
+  }
+}

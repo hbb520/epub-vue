@@ -1,0 +1,178 @@
+//to reset element-ui default css
+.el-upload {
+  input[type="file"] {
+    display: none !important;
+  }
+}
+
+.el-upload__input {
+  display: none;
+}
+
+//暂时性解决diolag 问题 https://github.com/ElemeFE/element/issues/2461
+.el-dialog {
+  transform: none;
+  left: 0;
+  position: relative;
+  margin: 0 auto;
+}
+
+//element ui upload
+.upload-container {
+  .el-upload {
+    width: 100%;
+
+    .el-upload-dragger {
+      width: 100%;
+      height: 200px;
+    }
+  }
+}
+
+.el-table__header thead tr th {
+  background: rgba(235, 235, 235, 1) !important;
+  font-size: 12px;
+  color: rgba(102, 102, 102, 1);
+  text-align: center;
+  font-weight: 100 !important;
+  padding: 5px 0 !important;
+}
+
+.el-table__row--striped {
+  background: rgba(247, 247, 247, 1) !important;
+}
+
+.el-table {
+  border-radius: 4px;
+  border: 1px solid rgba(235, 235, 235, 1) !important;
+  color: #333333 !important;
+  td {
+    border: none !important;
+  }
+}
+
+.el-table--small {
+  font-size: 14px !important;
+}
+
+.el-button--small {
+  font-size: 14px !important;
+}
+
+//分页
+.el-pagination {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 50px;
+  .el-pager{
+    .active{
+      background:rgba(35,101,241,1) !important;
+    }
+  }
+  .el-pager li {
+    box-sizing: border-box !important;
+    -moz-box-sizing: border-box !important; /* Firefox */
+    -webkit-box-sizing: border-box !important; /* Safari */
+    background: rgba(235, 235, 235, 1) !important; /* Safari */
+    border: 1px solid transparent;
+  }
+
+  button{
+    background: rgba(235, 235, 235, 1) !important; /* Safari */
+  }
+  button:hover{
+    background: rgba(235, 235, 235, 1) !important;
+    border: 1px solid rgba(93, 145, 255, 1) !important;
+  }
+}
+
+.el-pagination.is-background .el-pager li:not(.disabled):hover {
+  border: 1px solid rgba(93, 145, 255, 1) !important;
+}
+.el-pagination.is-background .el-pager li:not(.disabled).active{
+  background-color: #2365F1 !important;
+  color: #FFFFFF !important;
+}
+.el-message--info {
+  top: 50% !important;
+  background-color: #333333 !important;
+  padding: 20px 15px !important;;
+  border-color: #333333 !important;
+  .el-message__icon {
+    color: #ffffff !important;
+    display: none;
+  }
+  .el-message__content {
+    color: #ffffff !important;
+    width: 100%;
+    text-align: center !important;
+  }
+}
+
+.el-dialog {
+  border-radius: 12px !important;
+  .el-dialog__header {
+    border-bottom: 1px solid #EBEBEB;
+    .el-dialog__title {
+      font-weight: bold;
+      font-size: 14px;
+      color: #333;
+    }
+    .el-dialog__close {
+      color: #999;
+    }
+  }
+}
+
+.el-button--info {
+  background: rgba(238, 238, 238, 1) !important;
+  color: #333333 !important;
+}
+
+.el-button--info:hover {
+  background: #DDDDDD !important;
+}
+
+.el-form-item__label {
+  color: #333333 !important;
+}
+
+.el-message-box--center {
+  border-radius: 12px !important;
+  .el-message-box__header {
+    border-bottom: 1px solid #EBEBEB;
+    padding-top: 16px !important;
+    .el-message-box__title {
+      font-weight: bold;
+      font-size: 14px;
+      color: #333;
+      .el-icon-info {
+        display: none;
+      }
+    }
+    .el-icon-close {
+      color: #999;
+    }
+  }
+  .el-message-box__content {
+    font-size: 14px !important;
+    color: #333333 !important;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+  .el-message-box__btns {
+    .el-button {
+      border-radius: 16px;
+      width: 120px;
+      border: none !important;
+    }
+    .el-button:first-child {
+      background: rgba(238, 238, 238, 1);
+      color: #333333;
+    }
+    .el-button:first-child:hover {
+      background: #DDDDDD !important;
+      color: #333333;
+    }
+  }
+}
