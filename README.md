@@ -3,7 +3,7 @@
 
 ```bash
 # Clone project
-git clone https://github.com/PanJiaChen/vue-admin-template.git
+git clone https://github.com/hbb520/epub-vue.git
 
 # Install dependencies
 npm install
