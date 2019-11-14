@@ -26,6 +26,7 @@ export const constantRouterMap = [
   {
     path: '/',
     component: Layout,
+    redirect: '/list',
     name: 'Layout',
     children: []
   },
@@ -36,7 +37,7 @@ export const constantRouterMap = [
     meta: {
       title: ['书籍']
     }
-  },{
+  }, {
     path: '/list',
     name: 'List',
     component: _import('list/index'),
