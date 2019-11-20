@@ -8,7 +8,6 @@ import Layout from '../views/list/index';
 
 Vue.use(Router);
 
-
 /**
  * hidden: true                   if `hidden:true` will not show in the sidebar(default is false)
  * alwaysShow: true               if set true, will always show the root menu, whatever its child routes length
@@ -28,30 +27,34 @@ export const constantRouterMap = [
     component: Layout,
     redirect: '/list',
     name: 'Layout',
-    children: []
+    children: [],
   },
   {
-    path: '/index/:id',
+    path: '/index',
     name: 'Index',
     component: _import('index/index'),
     meta: {
-      title: ['书籍']
-    }
+      title: ['书籍'],
+    },
   }, {
     path: '/list',
     name: 'List',
     component: _import('list/index'),
     meta: {
-      title: ['书籍列表']
-    }
+      title: ['书籍列表'],
+    },
   },
-  {path: '/login', component: () => import('@/views/login/index'), hidden: true},
-  {path: '/404', component: () => import('@/views/404'), hidden: true},
-  {path: '*', redirect: '/404', hidden: true}
+  {
+    path: '/login',
+    component: () => import('@/views/login/index'),
+    hidden: true,
+  },
+  { path: '/404', component: () => import('@/views/404'), hidden: true },
+  { path: '*', redirect: '/404', hidden: true },
 ];
 
 export default new Router({
   // mode: 'history', //后端支持可开
-  scrollBehavior: () => ({y: 0}),
-  routes: constantRouterMap
+  scrollBehavior: () => ({ y: 0 }),
+  routes: constantRouterMap,
 });

@@ -36,6 +36,12 @@ import secondaryAgentManageAPI from './channel-manage/secondary-agent-manage';
 import secondaryAgentWithdrawalsApplyAPI from './channel-manage/secondary-agent-withdrawals-apply';
 import withdrawalsRecordAPI from './channel-manage/withdrawals-record';
 
+import listAPI from './list';
+import bookAPI from './book';
+
+Mock.mock(/\/book\/list/, 'get', listAPI.list);
+Mock.mock(/\/book\/detail/, 'get', bookAPI.detail);
+
 // Fix an issue with setting withCredentials = true, cross-domain request lost cookies
 // https://github.com/nuysoft/Mock/issues/300
 Mock.XHR.prototype.proxy_send = Mock.XHR.prototype.send;

@@ -1,0 +1,114 @@
+{
+  "id": "1517495",
+  "name": "在线书城",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon",
+  "description": "在线书城",
+  "glyphs": [
+    {
+      "icon_id": "725420",
+      "name": "搜索",
+      "font_class": "search",
+      "unicode": "e636",
+      "unicode_decimal": 58934
+    },
+    {
+      "icon_id": "848665",
+      "name": "书签",
+      "font_class": "tag",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    },
+    {
+      "icon_id": "930693",
+      "name": "双页",
+      "font_class": "doublepage",
+      "unicode": "e64e",
+      "unicode_decimal": 58958
+    },
+    {
+      "icon_id": "2189856",
+      "name": "标签",
+      "font_class": "sign",
+      "unicode": "e680",
+      "unicode_decimal": 59008
+    },
+    {
+      "icon_id": "3845889",
+      "name": "书签",
+      "font_class": "tagtool",
+      "unicode": "e623",
+      "unicode_decimal": 58915
+    },
+    {
+      "icon_id": "4020077",
+      "name": "左右",
+      "font_class": "right",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "5230377",
+      "name": "菜单",
+      "font_class": "menu",
+      "unicode": "eada",
+      "unicode_decimal": 60122
+    },
+    {
+      "icon_id": "6394640",
+      "name": "字体-字体-1",
+      "font_class": "fontsize",
+      "unicode": "e705",
+      "unicode_decimal": 59141
+    },
+    {
+      "icon_id": "6555688",
+      "name": "关 闭",
+      "font_class": "close",
+      "unicode": "e62c",
+      "unicode_decimal": 58924
+    },
+    {
+      "icon_id": "7153608",
+      "name": "全屏",
+      "font_class": "fullscreen",
+      "unicode": "e6bf",
+      "unicode_decimal": 59071
+    },
+    {
+      "icon_id": "8152678",
+      "name": "左右",
+      "font_class": "left",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "8572751",
+      "name": "加",
+      "font_class": "add",
+      "unicode": "e642",
+      "unicode_decimal": 58946
+    },
+    {
+      "icon_id": "9785780",
+      "name": "书籍",
+      "font_class": "book",
+      "unicode": "e61d",
+      "unicode_decimal": 58909
+    },
+    {
+      "icon_id": "9901677",
+      "name": "订单",
+      "font_class": "page",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "10292039",
+      "name": "删 除",
+      "font_class": "delete",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    }
+  ]
+}
