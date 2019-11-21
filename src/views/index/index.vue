@@ -45,10 +45,10 @@
 						<i class="iconfont iconsign"></i>
 						<span>生物学·视力矫正引发幻视？</span>
 					</div>
-					<div id="book"></div>
+					<div id="book" v-loading="bookLoading"></div>
 					<div class="bottom">
-						<span>23/56</span>
-						<span>24/56</span>
+						<span>{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
+						<span>{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
 					</div>
 				</div>
 				<div class="next" @click="next">
@@ -56,7 +56,8 @@
 				</div>
 			</div>
 		</div>
-		<el-slider v-model="pageNumber" vertical id="progress" :min="10" :max="60"></el-slider>
+		<progress-slider v-if="progress !== null" :progress="progress"
+		                 @change="onProgressChange" @valueChange="onValueChange"></progress-slider>
 		<input type="file" @change="getFile" style="position: relative; z-index: 1000">
 		<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container">
 			<mu-list>
@@ -86,9 +87,9 @@
 <style rel="stylesheet/scss" lang="scss">
 	#index-container {
 		#progress {
-			height: calc(100% - 56px);
+			height: calc(100% - 92px);
 			position: fixed;
-			top: 56px;
+			top: 74px;
 			right: 30px;
 
 			.el-slider__runway, .el-slider__bar {
@@ -118,9 +119,9 @@
 		}
 
 		@media (min-width: 600px) {
-			#wrapper {
-				height: calc(100vh - 64px);
-				top: 64px;
+			#progress {
+				height: calc(100vh - 100px);
+				top: 82px;
 			}
 		}
 	}

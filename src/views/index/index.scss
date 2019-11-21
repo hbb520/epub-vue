@@ -38,6 +38,7 @@
 				color: #A9A9A9;
 				font-size: 18px;
 				line-height: 20px;
+				user-select: none;
 
 				&.last {
 					color: #666666;
@@ -93,6 +94,7 @@
 					color: #999999;
 					font-size: 18px;
 					line-height: 20px;
+					user-select: none;
 
 					span {
 						&:first-child {
@@ -125,6 +127,7 @@
 				#book {
 					width: 100%;
 					height: calc(100% - 80px);
+					user-select: none;
 					//background-color: royalblue;
 				}
 			}
