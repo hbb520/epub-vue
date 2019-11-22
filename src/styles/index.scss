@@ -114,6 +114,18 @@ a:hover {
   }
 }
 
+.wordOverflow{
+	overflow: hidden;
+	text-overflow:ellipsis;
+	white-space: nowrap;
+}
+.wordOverflow2{
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+}
+
 .text-6 {
   color: #666;
 }

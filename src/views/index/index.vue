@@ -5,7 +5,6 @@
 			<mu-button icon slot="left" @click="$goLink('/list')">
 				<mu-icon value="navigate_before"></mu-icon>
 			</mu-button>
-
 			<mu-button flat slot="right" @click="menu_click">
 				<mu-icon value="menu"></mu-icon>
 			</mu-button>
@@ -59,18 +58,10 @@
 		<progress-slider v-if="progress !== null" :progress="progress"
 		                 @change="onProgressChange" @valueChange="onValueChange"></progress-slider>
 		<input type="file" @change="getFile" style="position: relative; z-index: 1000">
-		<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container">
-			<mu-list>
-				<mu-list-item button>
-					<mu-list-item-title>Menu Item 1</mu-list-item-title>
-				</mu-list-item>
-				<mu-list-item button>
-					<mu-list-item-title>Menu Item 2</mu-list-item-title>
-				</mu-list-item>
-				<mu-list-item @click="drawer_open = false" button>
-					<mu-list-item-title>Close</mu-list-item-title>
-				</mu-list-item>
-			</mu-list>
+		<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container" @close="dialogHandle">
+			<catalog v-if="catalogStatus" :rendition="bookRendition" @closeDialog="dialogHandle"></catalog>
+			<theme v-if="themeStatus" @closeDialog="dialogHandle"></theme>
+			<search v-if="searchStatus" @closeDialog="dialogHandle"></search>
 		</mu-drawer>
 	</div>
 </template>

@@ -1,0 +1,45 @@
+@import "src/styles/index.scss";
+
+#catalog {
+	overflow: hidden;
+
+	.catalog-container {
+		width: calc(100% + 17px);
+		overflow-x: hidden;
+		overflow-y: auto;
+
+		.list {
+			width: 100%;
+			padding: 0 67px 0 20px;
+
+			.chapter {
+				padding: 20px 16px 20px 20px;
+				color: #999999;
+				line-height: 20px;
+				border-bottom: 1px solid rgba(90, 93, 109, 0.1);
+
+				p {
+					width: calc(100% - 35px);
+					float: left;
+					font-size: 20px;
+				}
+
+				span {
+					width: 35px;
+					float: left;
+					font-size: 14px;
+					text-align: right;
+				}
+				&.active {
+					color: #223FEE;
+				}
+				&.unit {
+					p {
+						width: calc(100% - 85px);
+						margin-left: 50px;
+					}
+				}
+			}
+		}
+	}
+}

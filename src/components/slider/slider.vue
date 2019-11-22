@@ -1,8 +1,13 @@
 <template>
 	<div id="sliderContainer">
 		<div id="sliderBox">
-			<div id="sliderBtn" :style="{'top': top + 'px'}" @mouseover="tipStatus = true" @mouseout="tipStatus = false">
-				<div id="sliderTip" v-if="tipStatus || moveStatus">{{ (value === null ? 0 : value) + '%' }}</div>
+			<div id="sliderBtn" :style="{'top': top + 'px'}" @mouseover="tipStatus = true"
+			     @mouseout="tipStatus = false">
+				<div id="sliderTip" v-if="tipStatus || moveStatus" :style="{'top': tipTop + 'px'}"
+				     :class="value < 1 ? 'top' : value > 96 ? 'bottom' : '' ">
+					<p class="wordOverflow2">第一章 分子与细胞分子与细胞分子与细胞分子与细胞</p>
+					<span>{{ (value === null ? 0 : value) + '%' }}</span>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -17,13 +22,14 @@
         default: () => {
           return 0;
         },
-      },
+      }
     },
     data() {
       return {
         top: 0,
         moveStatus: false,
         tipStatus: false,
+        tipTop: 0,
       };
     },
     computed: {
@@ -32,9 +38,16 @@
           return this.progress;
         },
         set(value) {
+          if (value <= 1) {
+            this.tipTop = 0;
+          } else if (value > 96) {
+            this.tipTop = -47;
+          } else {
+            this.tipTop = -12;
+          }
           this.$emit('valueChange', value);
         },
-      },
+      }
     },
     methods: {
       init() {
@@ -54,11 +67,11 @@
               this.value = num;
               this.top = diffL;
             }
+            this.$emit('change', this.value);
           }
         });
         document.addEventListener('mouseup', e => {
           this.moveStatus = false;
-          this.$emit('change', this.value);
         });
       },
     },
@@ -75,7 +88,7 @@
 		width: 21px;
 		height: calc(100% - 56px);
 		position: fixed;
-		right: 30px;
+		right: 20px;
 		top: 56px;
 		margin: auto;
 		z-index: 1000;
@@ -100,27 +113,53 @@
 
 				#sliderTip {
 					display: block;
-					width: 40px;
+					width: 160px;
+					/*height:60px;*/
+					padding: 10px 20px;
 					position: absolute;
-					top: -2px;
-					left: -50px;
+					left: -170px;
 					color: #fff;
-					font-size: 12px;
-					text-align: center;
-					line-height: 40px;
-					background-color: #000;
-					border-radius: 4px;
 					user-select: none;
+					background: rgba(0, 0, 0, 1);
+					border-radius: 6px;
+					box-shadow: 0px 0px 6px 0px rgba(0, 1, 24, 0.4);
+					opacity: 0.5;
+					transition: top 0.3s;
 
-					#sliderTip:before {
+					p {
+						width: 100%;
+						font-size: 14px;
+						line-height: 20px;
+					}
+
+					span {
+						margin-top: 4px;
+						font-size: 12px;
+						line-height: 16px;
+					}
+
+					&:before {
 						content: '';
 						position: absolute;
-						top: 15px;
-						right: -10px;
+						top: 24px;
+						right: -12px;
 						width: 0;
 						height: 0;
-						border: 5px solid transparent;
+						border: 6px solid transparent;
 						border-left-color: #000;
+						transition: top 0.3s;
+					}
+
+					&.top {
+						&:before {
+							top: 12px;
+						}
+					}
+
+					&.bottom {
+						&:before {
+							top: 56px;
+						}
 					}
 				}
 			}
