@@ -34,7 +34,6 @@
 				<span v-if="bookInfo.currentChapter">></span>
 				<span v-if="bookInfo.currentChapter" class="last">{{ bookInfo.currentChapter }}</span>
 			</div>
-			<el-button @click="goTopage()"></el-button>
 			<div class="book-container clearfix">
 				<div class="prev" @click="prev" v-if="prevStatus">
 					<i class="iconfont iconleft"></i>
