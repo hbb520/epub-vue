@@ -17,11 +17,28 @@ export default {
   },
   methods: {
     getBookList() {
-      getList().then( res => {
-        this.bookList = res.data.items
-      }, error => {
-        this.$message.error(error)
-      })
+      this.bookList = [
+        {
+          'id': 1,
+          'title': '图书1',
+          'cover': '../../../static/imgs/book.png'
+        },
+        {
+          'id': 2,
+          'title': '图书2',
+          'cover': '../../../static/imgs/book.png'
+        },
+        {
+          'id': 3,
+          'title': '图书3',
+          'cover': '../../../static/imgs/book.png'
+        },
+      ]
+      // getList().then( res => {
+      //   this.bookList = res.data.items
+      // }, error => {
+      //   this.$message.error(error)
+      // })
     },
     addBook(obj) {
       this.bookList.push(obj)

@@ -11,16 +11,16 @@
 			<mu-button flat slot="right" @click="spellcheck_click">
 				<mu-icon value="spellcheck"></mu-icon>
 			</mu-button>
-			<mu-button flat slot="right" @click="library_books_click">
+			<mu-button flat slot="right" @click="setPageType">
 				<mu-icon value="library_books"></mu-icon>
 			</mu-button>
 			<mu-button flat slot="right" @click="search_click">
 				<mu-icon value="search"></mu-icon>
 			</mu-button>
-			<mu-button flat slot="right" @click="bookmark_border_click">
+			<mu-button flat slot="right" @click="collect">
 				<mu-icon value="bookmark_border"></mu-icon>
 			</mu-button>
-			<mu-button flat slot="right" @click="crop_free_click">
+			<mu-button flat slot="right" @click="setFullscreen">
 				<mu-icon value="crop_free"></mu-icon>
 			</mu-button>
 			<!--      </div>-->
@@ -57,11 +57,10 @@
 		</div>
 		<progress-slider v-if="progress !== null" :progress="progress"
 		                 @change="onProgressChange" @valueChange="onValueChange"></progress-slider>
-		<input type="file" @change="getFile" style="position: relative; z-index: 1000">
 		<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container" @close="dialogHandle">
 			<catalog v-if="catalogStatus" :rendition="bookRendition" @closeDialog="dialogHandle"></catalog>
-			<theme v-if="themeStatus" @closeDialog="dialogHandle"></theme>
-			<search v-if="searchStatus" @closeDialog="dialogHandle"></search>
+			<theme v-if="themeStatus" :rendition="bookRendition" @closeDialog="dialogHandle"></theme>
+			<search v-if="searchStatus" :rendition="bookRendition" @closeDialog="dialogHandle"></search>
 		</mu-drawer>
 	</div>
 </template>
@@ -107,6 +106,9 @@
 					border: none;
 				}
 			}
+		}
+		.mu-paper {
+			z-index: 2100!important;
 		}
 
 		@media (min-width: 600px) {

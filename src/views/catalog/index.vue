@@ -30,6 +30,42 @@
 				</div>
 			</div>
 		</div>
+		<div class="bookmark-container" v-if="menu === 2">
+			<div class="list">
+				<div class="bookmark clearfix">
+					<p class="clearfix">
+						<span>11-16 10:30</span>
+						<i class="iconfont icondelete"></i>
+						<span>55</span>
+					</p>
+					<p class="content wordOverflow2">中亚细亚高原，它不但是中国的地理高度，也是中国的精神高度，每一个忙忙碌碌的现代人，他都有必要</p>
+				</div>
+			</div>
+<!--			<div class="noBookmark">-->
+<!--				<p>暂时没有书签</p>-->
+<!--				<p>在阅读时点击按钮<i class="iconfont icontag"></i>添加书签</p>-->
+<!--			</div>-->
+		</div>
+		<div class="note-container" v-if="menu === 3">
+			<div class="list">
+				<div class="note clearfix">
+					<p class="clearfix">
+						<span><i>.</i>11-16 10:30</span>
+						<i class="iconfont icondelete"></i>
+						<span>55</span>
+					</p>
+					<p class="content wordOverflow2">中亚细亚高原，它不但是中国的地理高度，也是中国的精神高度，每一个忙忙碌碌的现代人，他都有必要</p>
+					<div class="bottom clearfix">
+						<p class="tips">注</p>
+						<p class="remarks wordOverflow2">中国地理高度，也是中国精神高度，每一个忙忙碌碌的现代人。</p>
+					</div>
+				</div>
+			</div>
+<!--			<div class="noNote">-->
+<!--				<p>暂时没有笔记</p>-->
+<!--				<p>在阅读时拖动鼠标选中文字添加笔记</p>-->
+<!--			</div>-->
+		</div>
 	</div>
 </template>
 
@@ -91,7 +127,7 @@
 				}
 			}
 		}
-		.catalog-container {
+		.catalog-container, .bookmark-container, .note-container {
 			height: calc(100vh - 56px);
 		}
 		@media (min-width: 600px) {
@@ -111,7 +147,7 @@
 					}
 				}
 			}
-			.catalog-container {
+			.catalog-container, .bookmark-container, .note-container {
 				height: calc(100vh - 64px);
 			}
 		}

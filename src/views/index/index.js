@@ -5,7 +5,6 @@ import Theme from '../theme/index.vue';
 import Search from '../search/index.vue';
 
 const ePub = window.ePub;
-global.epub = ePub;
 
 export default {
   data() {
@@ -39,7 +38,6 @@ export default {
     if (this.$route.query && this.$route.query.id) {
       this.id = this.$route.params.id;
       this.getBookUrl(this.$route.params.id);
-      // this.bookInit('../../../books/TeaWar.epub')
     }
   },
   created() {
@@ -50,12 +48,14 @@ export default {
       const params = {
         'id': id,
       };
-      getDetail(params).then(res => {
-        this.bookUrl = res.data.items.url;
-        // this.bookInit()
-      }, error => {
-        this.$message.error(error);
-      });
+      this.bookUrl = 'https://img1.yunser.com/epub/test.epub';
+      this.bookInit(this.bookUrl);
+      // getDetail(params).then(res => {
+      //   this.bookUrl = res.data.items.url;
+      //   this.bookInit(this.bookUrl);
+      // }, error => {
+      //   this.$message.error(error);
+      // });
     },
     // 图书解析渲染
     bookInit(url) {
@@ -65,17 +65,12 @@ export default {
       this.bookRendition = this.book.renderTo('book', {
         width: '100%',
         height: '100%',
+        spread: 'always',
       });
-      console.log(this.bookRendition);
-      this.displayed = this.bookRendition.display();
+      this.display = this.bookRendition.display();
       console.log(this.display);
       this.renderInit();
       // this.getBookInfo()
-    },
-    // 本地选择图书
-    getFile(e) {
-      this.book && this.book.destroy();
-      this.bookInit(e.target.files[0]);
     },
     // 获取图书信息
     getBookInfo() {
@@ -118,50 +113,50 @@ export default {
       this.bookInfo.currentPage = this.locations.locationFromCfi(location);
     },
     prev() {
-      this.bookRendition.prev().then(value => {
+      if (this.book.package.metadata.direction === 'rtl') {
+        this.bookRendition.next().then(value => {
 
-      });
+        });
+      } else {
+        this.bookRendition.prev().then(value => {
+
+        });
+      }
       // this.bookInfo.currentPage = this.locations.getCurrentLocation()
       // this.progress = this.bookInfo.currentPage
     },
     next() {
-      let one = this.bookRendition.next().then(value => {
-        console.log(value);
-      });
-      // console.log(one)
-      // this.bookInfo.currentPage = this.locations.getCurrentLocation()
-      // this.progress = this.bookInfo.currentPage
+      if (this.book.package.metadata.direction === 'rtl') {
+        this.bookRendition.prev().then(value => {
+
+        });
+      } else {
+        this.bookRendition.next().then(value => {
+
+        });
+      }
     },
     menu_click() {
-      console.log(1);
       this.drawer_open = true;
       this.dialogHandle(() => {
         this.catalogStatus = true;
       });
     },
     spellcheck_click() {
-      console.log(2);
       this.drawer_open = true;
       this.dialogHandle(() => {
         this.themeStatus = true;
       });
     },
-    library_books_click() {
-      this.drawer_open = true;
-    },
     search_click() {
-      console.log(3);
       this.drawer_open = true;
       this.dialogHandle(() => {
         this.searchStatus = true;
       });
     },
-    bookmark_border_click() {
-      this.drawer_open = true;
-    },
-    crop_free_click() {
-      this.drawer_open = true;
-    },
+    setPageType() {},
+    collect() {},
+    setFullscreen() {},
     dialogHandle(done) {
       this.catalogStatus = false;
       this.themeStatus = false;

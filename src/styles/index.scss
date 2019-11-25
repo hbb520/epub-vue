@@ -125,6 +125,21 @@ a:hover {
 	-webkit-line-clamp: 2;
 	overflow: hidden;
 }
+.wordOverflow3{
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	overflow: hidden;
+}
+.mu-overlay {
+	z-index: 2000!important;
+}
+.el-select-dropdown__item {
+	font-size: 18px;
+	line-height: 40px;
+	height: 40px;
+	text-indent: 15px;
+}
 
 .text-6 {
   color: #666;

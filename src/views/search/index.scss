@@ -1,5 +1,58 @@
 @import "src/styles/index.scss";
 
-#search{
+#search {
+	height: 100%;
+	overflow: hidden;
 
+
+	.search-container {
+		width: calc(100% + 17px);
+		height: 100%;
+		position: relative;
+		overflow-x: hidden;
+		overflow-y: auto;
+		background-color: #FBFBFB;
+
+		.box {
+			width: 100%;
+			padding: 27px 50px 0 20px;
+		}
+
+		.list {
+			width: 100%;
+			padding: 0 40px 0 10px;
+
+			.result {
+				padding: 10px 28px 10px 24px;
+				border-bottom: 1px solid rgba(90, 93, 109, 0.1);
+				&:first-child {
+					border-top: 1px solid rgba(90, 93, 109, 0.1);
+				}
+				p {
+					color: #333333;
+					font-size: 18px;
+					line-height: 30px;
+					&:before {
+						content: '...';
+					}
+					span {
+						color: #048D01;
+					}
+				}
+			}
+		}
+		.noContent, .noResult {
+			width: 100%;
+			height: 40px;
+			position: absolute;
+			top: 20%;
+			left: 0;
+			color: #666666;
+			p {
+				font-size: 20px;
+				text-align: center;
+				line-height: 40px;
+			}
+		}
+	}
 }
