@@ -1,12 +1,19 @@
 export default {
   components: {},
   props: {
-    rendition: {
+    chapterList: {
+      type: Array,
+      default: () => {
+        return []
+      }
+    },
+    currentChapter: {
       type: Object,
       default: () => {
         return {}
       }
-    }
+    },
+
   },
   data() {
     return {
@@ -22,8 +29,13 @@ export default {
         this.$emit('closeDialog');
       }
     },
+    goToChapter(chapter) {
+      this.$emit('goToChapter', chapter)
+    },
     getCatalogList() {
-      // console.log(this.rendition)
+      // 章节变化
+      console.log(this.chapterList)
+      console.log(this.currentChapter)
     },
     init() {
 

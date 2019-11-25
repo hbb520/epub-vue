@@ -31,18 +31,19 @@
 				<span @click="$goLink('/list')">首页</span>
 				<span v-if="bookInfo.title">></span>
 				<span v-if="bookInfo.title">{{ bookInfo.title }}</span>
-				<span v-if="bookInfo.title">></span>
-				<span v-if="bookInfo.title" class="last">土木工程</span>
+				<span v-if="bookInfo.currentChapter">></span>
+				<span v-if="bookInfo.currentChapter" class="last">{{ bookInfo.currentChapter }}</span>
 			</div>
+			<el-button @click="goTopage()"></el-button>
 			<div class="book-container clearfix">
-				<div class="prev" @click="prev">
+				<div class="prev" @click="prev" v-if="prevStatus">
 					<i class="iconfont iconleft"></i>
 				</div>
 				<div class="bookBox">
 					<div class="top clearfix">
 						<span>{{ bookInfo.title }}</span>
 						<i class="iconfont iconsign"></i>
-						<span>生物学·视力矫正引发幻视？</span>
+						<span>{{ bookInfo.currentChapter }}</span>
 					</div>
 					<div id="book" v-loading="bookLoading"></div>
 					<div class="bottom">
@@ -50,7 +51,7 @@
 						<span>{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
 					</div>
 				</div>
-				<div class="next" @click="next">
+				<div class="next" @click="next" v-if="nextStatus">
 					<i class="iconfont iconright"></i>
 				</div>
 			</div>
@@ -58,7 +59,8 @@
 		<progress-slider v-if="progress !== null" :progress="progress"
 		                 @change="onProgressChange" @valueChange="onValueChange"></progress-slider>
 		<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container" @close="dialogHandle">
-			<catalog v-if="catalogStatus" :rendition="bookRendition" @closeDialog="dialogHandle"></catalog>
+			<catalog v-if="catalogStatus" :chapterList="book.navigation.toc" :currentChapter="currentChapter"
+			         @closeDialog="dialogHandle" @goToChapter="goToChapter"></catalog>
 			<theme v-if="themeStatus" :rendition="bookRendition" @closeDialog="dialogHandle"></theme>
 			<search v-if="searchStatus" :rendition="bookRendition" @closeDialog="dialogHandle"></search>
 		</mu-drawer>

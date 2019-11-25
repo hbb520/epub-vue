@@ -8,26 +8,15 @@
 		</mu-bottom-nav>
 		<div class="catalog-container" v-if="menu === 1">
 			<div class="list">
-				<div class="chapter clearfix">
-					<p class="wordOverflow">版权信息</p>
+				<div v-for="(item, index) in chapterList" :key="index"
+				     :class="item.href === currentChapter.href ? 'chapter active clearfix' : 'chapter clearfix'">
+					<p class="wordOverflow" @click="goToChapter(item)">{{ item.label }}</p>
 					<span>1</span>
 				</div>
-				<div class="chapter clearfix">
-					<p class="wordOverflow">引言</p>
-					<span>2</span>
-				</div>
-				<div class="chapter unit clearfix">
-					<p class="wordOverflow">第一章 何为创新，何非创新</p>
-					<span>20</span>
-				</div>
-				<div class="chapter active unit clearfix">
-					<p class="wordOverflow">第二章 何为创新，何非创新</p>
-					<span>20</span>
-				</div>
-				<div class="chapter unit clearfix">
-					<p class="wordOverflow">第三章 何为创新，何非创新</p>
-					<span>20</span>
-				</div>
+<!--				<div class="chapter active clearfix">-->
+<!--					<p class="wordOverflow">第二章 何为创新，何非创新</p>-->
+<!--					<span>20</span>-->
+<!--				</div>-->
 			</div>
 		</div>
 		<div class="bookmark-container" v-if="menu === 2">

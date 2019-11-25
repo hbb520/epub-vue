@@ -22,8 +22,12 @@ export default {
         title: null,
         currentPage: null,
         totalPage: null,
+        currentChapter: null,
       },
+      prevStatus: true,
+      nextStatus: true,
       catalogStatus: false,
+      currentChapter: null,
       themeStatus: false,
       searchStatus: false,
     };
@@ -49,6 +53,7 @@ export default {
         'id': id,
       };
       this.bookUrl = 'https://img1.yunser.com/epub/test.epub';
+      // this.bookUrl = 'https://s3.amazonaws.com/moby-dick/moby-dick.epub';
       this.bookInit(this.bookUrl);
       // getDetail(params).then(res => {
       //   this.bookUrl = res.data.items.url;
@@ -61,31 +66,14 @@ export default {
     bookInit(url) {
       this.bookLoading = true;
       this.book = ePub(url);
-      console.log(this.book);
       this.bookRendition = this.book.renderTo('book', {
         width: '100%',
         height: '100%',
         spread: 'always',
       });
       this.display = this.bookRendition.display();
-      console.log(this.display);
       this.renderInit();
-      // this.getBookInfo()
-    },
-    // 获取图书信息
-    getBookInfo() {
-      // 获取图书信息
-      this.bookRendition.getMetadata().then(meta => {
-        this.bookInfo.title = meta.bookTitle;
-      });
-      // 获取图书章节
-      this.book.getToc().then(toc => {
-        // console.log(toc)
-      });
-      // 页数变化时 获取图书总页数
-      this.book.pageListReady.then(pageList => {
-        this.bookInfo.totalPage = this.book.pagination.totalPages;
-      });
+
     },
     // 阅读器初始化
     renderInit() {
@@ -94,12 +82,49 @@ export default {
         return this.book.locations.generate();
       }).then(result => {
         this.bookLoading = false;
+        console.log(111111);
+        console.log(this.book);
+        this.getBookInfo();
         this.locations = this.book.locations;
+        console.log(this.locations);
         // 进度条初始化
         this.progress = 0;
         this.bookInfo.totalPage = this.locations.total;
         this.bookInfo.currentPage = this.locations._current;
       });
+
+      // 章节变化
+      this.bookRendition.on('rendered', (section) => {
+        console.log(22222);
+        let current = this.book.navigation &&
+            this.book.navigation.toc.filter(val => {
+              return val.href === section.href;
+            })[0];
+        this.currentChapter = section;
+        this.bookInfo.currentChapter = current && current.label;
+      });
+      // 页码变化
+      this.bookRendition.on('relocated', location => {
+        console.log(333333);
+        console.log(location)
+        console.log(location.start.displayed)
+        this.nextStatus = location.atEnd ? false : true;
+        this.prevStatus = location.atStart ? false : true;
+      });
+    },
+    // 获取图书信息
+    getBookInfo() {
+      // 获取图书信息
+      console.log(this.book.package.metadata);
+      this.bookInfo.title = this.book.package.metadata.title;
+      // 获取图书章节
+      // this.book.getToc().then(toc => {
+      //   // console.log(toc)
+      // });
+      // 页数变化时 获取图书总页数
+      // this.book.pageListReady.then(pageList => {
+      //   this.bookInfo.totalPage = this.book.pagination.totalPages;
+      // });
     },
     onValueChange(progress) {
       this.progress = progress;
@@ -136,11 +161,20 @@ export default {
         });
       }
     },
+    // 打开目录
     menu_click() {
       this.drawer_open = true;
       this.dialogHandle(() => {
         this.catalogStatus = true;
       });
+    },
+    // 章节跳转
+    goToChapter(chapter) {
+      this.bookRendition.display(chapter.href);
+    },
+    // 页面跳转
+    goTopage() {
+      this.bookRendition.display('epubcfi(/6/12[id10]!/4/134/1:42)');
     },
     spellcheck_click() {
       this.drawer_open = true;
@@ -157,6 +191,7 @@ export default {
     setPageType() {},
     collect() {},
     setFullscreen() {},
+    // 打开弹窗
     dialogHandle(done) {
       this.catalogStatus = false;
       this.themeStatus = false;
