@@ -3,12 +3,17 @@ import ProgressSlider from '../../components/slider/slider.vue';
 import Catalog from '../catalog/index.vue';
 import Theme from '../theme/index.vue';
 import Search from '../search/index.vue';
+import {
+  getBookmarks,
+  setBookmarks,
+} from '../../utils/auth';
 
 const ePub = window.ePub;
 
 export default {
   data() {
     return {
+      id: null,
       bookLoading: false,
       file: null,
       book: null,
@@ -18,6 +23,7 @@ export default {
       locations: null,
       drawer_open: false,
       progress: null,
+      progressTips: null,
       bookInfo: {
         title: null,
         currentPage: null,
@@ -28,8 +34,12 @@ export default {
       nextStatus: true,
       catalogStatus: false,
       currentChapter: null,
+      bookmarksStatus: false,
+      bookWidth: 0,
+      singlePageStatus: false,
       themeStatus: false,
       searchStatus: false,
+      fullScreenStatus: false,
     };
   },
   components: {
@@ -40,11 +50,12 @@ export default {
   },
   mounted() {
     if (this.$route.query && this.$route.query.id) {
-      this.id = this.$route.params.id;
-      this.getBookUrl(this.$route.params.id);
+      this.id = parseInt(this.$route.query.id);
+      this.getBookUrl(this.$route.query.id);
     }
   },
   created() {
+
   },
   methods: {
     // 获取图书路径
@@ -72,8 +83,9 @@ export default {
         spread: 'always',
       });
       this.display = this.bookRendition.display();
+      this.bookWidth = document.getElementById('book').clientWidth;
+      this.screenWidthChange();
       this.renderInit();
-
     },
     // 阅读器初始化
     renderInit() {
@@ -85,12 +97,11 @@ export default {
         console.log(111111);
         console.log(this.book);
         this.getBookInfo();
-        this.locations = this.book.locations;
-        console.log(this.locations);
+        // this.locations = this.book.locations;
         // 进度条初始化
         this.progress = 0;
-        this.bookInfo.totalPage = this.locations.total;
-        this.bookInfo.currentPage = this.locations._current;
+        // this.bookInfo.totalPage = this.locations.total;
+        // this.bookInfo.currentPage = this.locations._current;
       });
 
       // 章节变化
@@ -102,63 +113,51 @@ export default {
             })[0];
         this.currentChapter = section;
         this.bookInfo.currentChapter = current && current.label;
+        this.progressTips = current && current.label;
       });
       // 页码变化
       this.bookRendition.on('relocated', location => {
         console.log(333333);
-        console.log(location)
-        console.log(location.start.displayed)
+        this.locations = location;
+        console.log(location);
+        this.progress = location.start && location.start.percentage * 100;
         this.nextStatus = location.atEnd ? false : true;
         this.prevStatus = location.atStart ? false : true;
+        this.bookmarksStatus = getBookmarks(this.id).some(val => {
+          return val.cfi === location.start.cfi;
+        });
+      });
+
+      // 布局变化
+      this.bookRendition.on('layout', function(layout) {
+        console.log(44444444);
       });
     },
     // 获取图书信息
     getBookInfo() {
       // 获取图书信息
-      console.log(this.book.package.metadata);
       this.bookInfo.title = this.book.package.metadata.title;
-      // 获取图书章节
-      // this.book.getToc().then(toc => {
-      //   // console.log(toc)
-      // });
-      // 页数变化时 获取图书总页数
-      // this.book.pageListReady.then(pageList => {
-      //   this.bookInfo.totalPage = this.book.pagination.totalPages;
-      // });
-    },
-    onValueChange(progress) {
-      this.progress = progress;
     },
     // 进度条跳转
     onProgressChange(progress) {
       const percentage = progress / 100;
-      const location = progress > 0 ? this.locations.cfiFromPercentage(
+      const location = progress > 0 ? this.book.locations.cfiFromPercentage(
           percentage) : 0;
       this.bookRendition.display(location);
-      this.bookInfo.currentPage = this.locations.locationFromCfi(location);
+      // this.bookInfo.currentPage = this.book.locations.locationFromCfi(location);
     },
     prev() {
       if (this.book.package.metadata.direction === 'rtl') {
-        this.bookRendition.next().then(value => {
-
-        });
+        this.bookRendition.next();
       } else {
-        this.bookRendition.prev().then(value => {
-
-        });
+        this.bookRendition.prev();
       }
-      // this.bookInfo.currentPage = this.locations.getCurrentLocation()
-      // this.progress = this.bookInfo.currentPage
     },
     next() {
       if (this.book.package.metadata.direction === 'rtl') {
-        this.bookRendition.prev().then(value => {
-
-        });
+        this.bookRendition.prev();
       } else {
-        this.bookRendition.next().then(value => {
-
-        });
+        this.bookRendition.next();
       }
     },
     // 打开目录
@@ -172,27 +171,92 @@ export default {
     goToChapter(chapter) {
       this.bookRendition.display(chapter.href);
     },
-    // 页面跳转
-    goTopage() {
-      this.bookRendition.display('epubcfi(/6/12[id10]!/4/134/1:42)');
+    // 设置书签
+    setBookmarks() {
+      if (this.bookmarksStatus) {
+        return true;
+      }
+      let obj = this.locations && this.locations.start;
+      let content = this.bookRendition.getRange(obj.cfi) &&
+          this.bookRendition.getRange(obj.cfi).commonAncestorContainer;
+      let word = content && content.data;
+      let isSign = word.split(' ').some(val => val === '\n');
+      if ( !isSign) {
+        setBookmarks(this.id, {
+          id: this.id + new Date().getTime(),
+          bookId: this.id,
+          cfi: obj.cfi,
+          href: obj.href,
+          word: word,
+          createTime: new Date().getTime(),
+        });
+        this.bookmarksStatus = true;
+      }
     },
+    // 书签跳转
+    gotoBookmarks(cfi) {
+      this.bookRendition.display(cfi);
+    },
+    // 打开选项弹框
     spellcheck_click() {
       this.drawer_open = true;
       this.dialogHandle(() => {
         this.themeStatus = true;
       });
     },
+    // 打开搜索弹框
     search_click() {
       this.drawer_open = true;
       this.dialogHandle(() => {
         this.searchStatus = true;
       });
     },
-    setPageType() {},
-    collect() {},
-    setFullscreen() {},
+    // 设置单/双页模式
+    setPageType() {
+      let width = document.body.clientWidth;
+      if (width > 1133) {
+        if (this.singlePageStatus) {
+          this.bookRendition.resize(this.bookWidth);
+        } else {
+          this.bookRendition.resize(640);
+        }
+        this.singlePageStatus = !this.singlePageStatus;
+      }
+    },
+    // 监听屏幕大小变化
+    screenWidthChange() {
+      window.onresize = () => {
+        this.bookWidth = document.getElementById('book').clientWidth;
+        this.bookRendition.resize(this.bookWidth);
+        this.singlePageStatus = this.bookWidth < 800
+            ? false
+            : this.singlePageStatus;
+      };
+    },
+    // 全屏
+    setFullscreen() {
+      if (this.fullScreenStatus) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.webkitCancelFullScreen) {
+          document.webkitCancelFullScreen();
+        }
+        this.fullScreenStatus = false;
+      } else {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) {
+          document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullScreen) {
+          document.documentElement.webkitRequestFullScreen();
+        }
+        this.fullScreenStatus = true;
+      }
+    },
     // 打开弹窗
-    dialogHandle(done) {
+    dialogHandle(done, isClose) {
       this.catalogStatus = false;
       this.themeStatus = false;
       this.searchStatus = false;
@@ -200,7 +264,8 @@ export default {
         if (typeof done === 'function') {
           done();
         }
-      } else {
+      }
+      if (isClose) {
         this.drawer_open = false;
       }
     },

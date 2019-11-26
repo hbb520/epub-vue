@@ -83,12 +83,14 @@
 				width: calc(100% - 110px);
 				height: 100%;
 				padding: 20px 55px;
-				float: left;
-				margin-left: 55px;
+				margin: 0 auto;
 				position: relative;
 				background-color: #ffffff;
 				box-shadow: 0px 0px 10px 0px rgba(0, 61, 202, 0.5);
 				border-radius: 10px;
+				&.singlePage {
+					width: 750px;
+				}
 
 				.top, .bottom {
 					color: #999999;
@@ -113,6 +115,7 @@
 						color: #FF0000;
 						font-size: 28px;
 						line-height: 32px;
+						cursor: pointer;
 					}
 				}
 

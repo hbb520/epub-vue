@@ -17,7 +17,7 @@
 			<mu-button flat slot="right" @click="search_click">
 				<mu-icon value="search"></mu-icon>
 			</mu-button>
-			<mu-button flat slot="right" @click="collect">
+			<mu-button flat slot="right" @click="setBookmarks">
 				<mu-icon value="bookmark_border"></mu-icon>
 			</mu-button>
 			<mu-button flat slot="right" @click="setFullscreen">
@@ -38,10 +38,10 @@
 				<div class="prev" @click="prev" v-if="prevStatus">
 					<i class="iconfont iconleft"></i>
 				</div>
-				<div class="bookBox">
+				<div :class="singlePageStatus ? 'bookBox singlePage' : 'bookBox'">
 					<div class="top clearfix">
 						<span>{{ bookInfo.title }}</span>
-						<i class="iconfont iconsign"></i>
+						<i class="iconfont iconsign" v-if="bookmarksStatus"></i>
 						<span>{{ bookInfo.currentChapter }}</span>
 					</div>
 					<div id="book" v-loading="bookLoading"></div>
@@ -55,11 +55,13 @@
 				</div>
 			</div>
 		</div>
-		<progress-slider v-if="progress !== null" :progress="progress"
-		                 @change="onProgressChange" @valueChange="onValueChange"></progress-slider>
+
+		<progress-slider v-if="progress !== null" :progress.sync="progress" :tips="progressTips"
+		                 @change="onProgressChange"></progress-slider>
 		<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container" @close="dialogHandle">
-			<catalog v-if="catalogStatus" :chapterList="book.navigation.toc" :currentChapter="currentChapter"
-			         @closeDialog="dialogHandle" @goToChapter="goToChapter"></catalog>
+			<catalog v-if="catalogStatus" :id="id" :chapterList="book.navigation.toc" :currentChapter="currentChapter"
+			         @closeDialog="dialogHandle" @goToChapter="goToChapter"
+			         @gotoBookmarks="gotoBookmarks"></catalog>
 			<theme v-if="themeStatus" :rendition="bookRendition" @closeDialog="dialogHandle"></theme>
 			<search v-if="searchStatus" :rendition="bookRendition" @closeDialog="dialogHandle"></search>
 		</mu-drawer>

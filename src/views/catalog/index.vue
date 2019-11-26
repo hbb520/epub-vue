@@ -13,27 +13,24 @@
 					<p class="wordOverflow" @click="goToChapter(item)">{{ item.label }}</p>
 					<span>1</span>
 				</div>
-<!--				<div class="chapter active clearfix">-->
-<!--					<p class="wordOverflow">第二章 何为创新，何非创新</p>-->
-<!--					<span>20</span>-->
-<!--				</div>-->
 			</div>
 		</div>
 		<div class="bookmark-container" v-if="menu === 2">
-			<div class="list">
-				<div class="bookmark clearfix">
+			<div class="list" v-if="bookmarksList.length > 0">
+				<div class="bookmark clearfix" v-for="(item, index) in bookmarksList" :key="index">
 					<p class="clearfix">
-						<span>11-16 10:30</span>
-						<i class="iconfont icondelete"></i>
+<!--						<span>11-16 10:30</span>-->
+						<span>{{ parseTime(item.createTime) }}</span>
+						<i class="iconfont icondelete" @click="delBookmarks(item.id)"></i>
 						<span>55</span>
 					</p>
-					<p class="content wordOverflow2">中亚细亚高原，它不但是中国的地理高度，也是中国的精神高度，每一个忙忙碌碌的现代人，他都有必要</p>
+					<p class="content wordOverflow2" @click="getoBookmarks(item.cfi)">{{ item.word }}</p>
 				</div>
 			</div>
-<!--			<div class="noBookmark">-->
-<!--				<p>暂时没有书签</p>-->
-<!--				<p>在阅读时点击按钮<i class="iconfont icontag"></i>添加书签</p>-->
-<!--			</div>-->
+			<div class="noBookmark" v-if="bookmarksList.length <= 0">
+				<p>暂时没有书签</p>
+				<p>在阅读时点击按钮<i class="iconfont icontag"></i>添加书签</p>
+			</div>
 		</div>
 		<div class="note-container" v-if="menu === 3">
 			<div class="list">

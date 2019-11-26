@@ -2,10 +2,9 @@
 	<div id="sliderContainer">
 		<div id="sliderBox">
 			<div id="sliderBtn" :style="{'top': top + 'px'}" @mouseover="tipStatus = true"
-			     @mouseout="tipStatus = false">
-				<div id="sliderTip" v-if="tipStatus || moveStatus" :style="{'top': tipTop + 'px'}"
-				     :class="value < 1 ? 'top' : value > 96 ? 'bottom' : '' ">
-					<p class="wordOverflow2">第一章 分子与细胞分子与细胞分子与细胞分子与细胞</p>
+			     @mouseout="tipStatus = false" :class="tipStatus || moveStatus ? 'arise' : ''">
+				<div id="sliderTip" v-if="tipStatus || moveStatus" :style="{'top': tipTop + 'px'}">
+					<p id="word" class="wordOverflow2">{{ tips }}</p>
 					<span>{{ (value === null ? 0 : value) + '%' }}</span>
 				</div>
 			</div>
@@ -22,34 +21,48 @@
         default: () => {
           return 0;
         },
-      }
+      },
+      tips: {
+        type: String,
+        default: () => {
+          return null;
+        },
+      },
     },
     data() {
       return {
-        top: 0,
+        width: document.body.clientWidth,
+        height: document.body.clientHeight,
         moveStatus: false,
         tipStatus: false,
-        tipTop: 0,
+        tipTop: 0
       };
     },
     computed: {
       value: {
         get() {
-          return this.progress;
+          let value = Math.round(this.progress);
+          this.setTipTop(value);
+          return value;
         },
         set(value) {
-          if (value <= 1) {
-            this.tipTop = 0;
-          } else if (value > 96) {
-            this.tipTop = -47;
-          } else {
-            this.tipTop = -12;
-          }
-          this.$emit('valueChange', value);
+          this.$emit('update:progress', value);
+          this.setTipTop(value);
         },
-      }
+      },
+      top: {
+        get() {
+          let headerHeight = this.width < 600 ? 56 : 64;
+          return this.progress * (this.height - headerHeight - 36) / 100;
+        },
+        set(value){}
+      },
     },
     methods: {
+      setTipTop(value) {
+        let headerHeight = this.width < 600 ? 56 : 64;
+        this.tipTop = headerHeight + value * (this.height - 80 - headerHeight) / 100;
+      },
       init() {
         let slider = document.getElementById('sliderBtn');
         this.moveStatus = false;
@@ -67,11 +80,13 @@
               this.value = num;
               this.top = diffL;
             }
-            this.$emit('change', this.value);
           }
         });
         document.addEventListener('mouseup', e => {
-          this.moveStatus = false;
+          if (this.moveStatus) {
+            this.$emit('change', this.value);
+            this.moveStatus = false;
+          }
         });
       },
     },
@@ -111,20 +126,36 @@
 				background-color: #CCCCCC;
 				border: 1px solid #999999;
 
+				&:before {
+					display: none;
+					content: '';
+					position: absolute;
+					top: 11px;
+					left: -11px;
+					width: 0;
+					height: 0;
+					opacity: 0.5;
+					border: 6px solid transparent;
+					border-left-color: #000;
+				}
+
+				&.arise:before {
+					display: block;
+				}
+
 				#sliderTip {
 					display: block;
 					width: 160px;
-					/*height:60px;*/
+					height: 80px;
 					padding: 10px 20px;
-					position: absolute;
-					left: -170px;
+					position: fixed;
+					right: 45px;
 					color: #fff;
 					user-select: none;
 					background: rgba(0, 0, 0, 1);
 					border-radius: 6px;
 					box-shadow: 0px 0px 6px 0px rgba(0, 1, 24, 0.4);
 					opacity: 0.5;
-					transition: top 0.3s;
 
 					p {
 						width: 100%;
@@ -136,18 +167,6 @@
 						margin-top: 4px;
 						font-size: 12px;
 						line-height: 16px;
-					}
-
-					&:before {
-						content: '';
-						position: absolute;
-						top: 24px;
-						right: -12px;
-						width: 0;
-						height: 0;
-						border: 6px solid transparent;
-						border-left-color: #000;
-						transition: top 0.3s;
 					}
 
 					&.top {
