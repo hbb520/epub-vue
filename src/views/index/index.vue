@@ -38,7 +38,7 @@
 				<div class="prev" @click="prev" v-if="prevStatus">
 					<i class="iconfont iconleft"></i>
 				</div>
-				<div :class="singlePageStatus ? 'bookBox singlePage' : 'bookBox'">
+				<div :class="singlePageStatus ? ('bookBox singlePage ' + theme) : ('bookBox ' + theme)">
 					<div class="top clearfix">
 						<span>{{ bookInfo.title }}</span>
 						<i class="iconfont iconsign" v-if="bookmarksStatus"></i>
@@ -46,8 +46,10 @@
 					</div>
 					<div id="book" v-loading="bookLoading"></div>
 					<div class="bottom">
-						<span>{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
-						<span>{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
+						<span v-if="bookInfo.currentPage && bookInfo.totalPage && !singlePageStatus">
+							{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
+						<span v-if="bookInfo.currentPage && bookInfo.totalPage">
+							{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
 					</div>
 				</div>
 				<div class="next" @click="next" v-if="nextStatus">
@@ -62,8 +64,11 @@
 			<catalog v-if="catalogStatus" :id="id" :chapterList="book.navigation.toc" :currentChapter="currentChapter"
 			         @closeDialog="dialogHandle" @goToChapter="goToChapter"
 			         @gotoBookmarks="gotoBookmarks"></catalog>
-			<theme v-if="themeStatus" :rendition="bookRendition" @closeDialog="dialogHandle"></theme>
-			<search v-if="searchStatus" :rendition="bookRendition" @closeDialog="dialogHandle"></search>
+			<theme v-if="themeStatus" @closeDialog="dialogHandle"
+			       @setFont="setFont" @setFontSize="setFontSize"
+			       @setLineHeight="setLineHeight" @setBackground="setBackground"></theme>
+			<search v-if="searchStatus" @closeDialog="dialogHandle" :list.sync="searchResult"
+			        @search="search"></search>
 		</mu-drawer>
 	</div>
 </template>

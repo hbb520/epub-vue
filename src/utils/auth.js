@@ -25,6 +25,18 @@ export function removeToken() {
 //   "createTime": Date,
 // }
 
+export function getLS(key) {
+  return LocalStorage.getItem(key);
+}
+
+export function setLS(key, value) {
+  return LocalStorage.setItem(key, value);
+}
+
+export function removeLS(key) {
+  return LocalStorage.removeItem(key);
+}
+
 export function getBookmarks(id) {
   let key = 'bookmarks-' + id;
   let list = JSON.parse(LocalStorage.getItem(key)) || []

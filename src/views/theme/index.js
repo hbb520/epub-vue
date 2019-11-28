@@ -1,65 +1,93 @@
+import {
+  getLS,
+} from '../../utils/auth'
+
 export default {
   components: {},
-  props: {
-    rendition: {
-      type: Object,
-      default: () => {
-        return {};
-      },
-    },
-  },
   data() {
     return {
-      value: null,
-      fontType: 1,
-      fontsize: 12,
-      lineHeight: null,
-      background: null,
+      fontType: 'MicrosoftYaHei',
+      fontsize: 16,
+      lineHeight: 1.2,
+      background: 'default',
       fontTypeList: [
         {
-          label: '仿宋',
-          value: 1,
+          label: '微软雅黑',
+          value: 'MicrosoftYaHei',
+        },
+        {
+          label: '黑体',
+          value: 'Microsoft Yahei, Heiti SC, Heiti TC',
+        },
+        {
+          label: '宋体',
+          value: 'SimSun, Songti SC, Songti TC',
         },
         {
           label: '楷体',
-          value: 2,
+          value: 'KaiTi, Kaiti SC, Kaiti TC',
         },
         {
-          label: '微软雅黑',
-          value: 3,
+          label: '圆体',
+          value: 'YouYuan, Yuanti SC, Yuanti TC',
+        },
+        {
+          label: '方体',
+          value: 'PingFang SC, PingFang TC',
         },
       ],
+      backgroundList: [
+        {
+          value: {}
+        },
+      ]
     };
   },
   created() {
-    this.getCatalogList();
+    this.getTheme()
   },
   methods: {
     close() {
       this.$emit('closeDialog');
     },
+    getTheme() {
+      this.fontType = getLS('fontFamily')
+      this.fontsize = getLS('fontSize')
+      this.lineHeight = getLS('lineHeight')
+      this.background = getLS('background')
+      console.log(this.fontType)
+      console.log(this.fontsize)
+      console.log(this.lineHeight)
+      console.log(this.background)
+    },
+    // 字体
+    setFont(value) {
+      console.log(value)
+      this.$emit('setFont', value)
+    },
     // 字体大小减一
     sub() {
       if (this.fontsize > 12) {
         this.fontsize--;
+        this.$emit('setFontSize', this.fontsize)
       }
     },
     // 字体大小加一
     add() {
       if (this.fontsize < 50) {
         this.fontsize++;
+        this.$emit('setFontSize', this.fontsize)
       }
     },
     // 设置字体行高
     setLineHeight(value) {
-      this.lineHeight = value
+      this.lineHeight = value;
+      this.$emit('setLineHeight', this.lineHeight, this.background)
     },
     // 设置背景
     setBackground(value) {
-      this.background = value
-    },
-    getCatalogList() {
-      // console.log(this.rendition)
+      this.background = value;
+      this.$emit('setBackground', this.background)
     },
     init() {
 

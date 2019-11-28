@@ -85,15 +85,32 @@
 				padding: 20px 55px;
 				margin: 0 auto;
 				position: relative;
+				color: #999999;
 				background-color: #ffffff;
 				box-shadow: 0px 0px 10px 0px rgba(0, 61, 202, 0.5);
 				border-radius: 10px;
+				&.default {
+					//color: #999999;
+					background-color: #ffffff;
+				}
+				&.bright {
+					//color: #999999;
+					background-color: #FFDDAA;
+				}
+				&.eyeProtection {
+					//color: #999999;
+					background-color: #BFE2CB;
+				}
+				&.night {
+					//color: #999999;
+					background-color: #141414;
+				}
+
 				&.singlePage {
 					width: 750px;
 				}
 
 				.top, .bottom {
-					color: #999999;
 					font-size: 18px;
 					line-height: 20px;
 					user-select: none;

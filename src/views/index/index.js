@@ -4,6 +4,8 @@ import Catalog from '../catalog/index.vue';
 import Theme from '../theme/index.vue';
 import Search from '../search/index.vue';
 import {
+  getLS,
+  setLS,
   getBookmarks,
   setBookmarks,
 } from '../../utils/auth';
@@ -38,7 +40,9 @@ export default {
       bookWidth: 0,
       singlePageStatus: false,
       themeStatus: false,
+      theme: null,
       searchStatus: false,
+      searchResult: [],
       fullScreenStatus: false,
     };
   },
@@ -97,11 +101,9 @@ export default {
         console.log(111111);
         console.log(this.book);
         this.getBookInfo();
-        // this.locations = this.book.locations;
+        this.setBookTheme();
         // 进度条初始化
         this.progress = 0;
-        // this.bookInfo.totalPage = this.locations.total;
-        // this.bookInfo.currentPage = this.locations._current;
       });
 
       // 章节变化
@@ -119,7 +121,20 @@ export default {
       this.bookRendition.on('relocated', location => {
         console.log(333333);
         this.locations = location;
-        console.log(location);
+        console.log(this.book.navigation);
+        console.log(this.locations);
+        this.bookInfo.totalPage = this.book.navigation.toc.length;
+        let currentPage = this.book.navigation.toc.map((val, ind) => {
+          return {
+            index: ind,
+            ...val,
+          };
+        }).filter((val, ind) => {
+          return val.href === this.locations.start.href;
+        })[0];
+        this.bookInfo.currentPage = currentPage && currentPage.index + 1;
+        console.log(this.bookInfo.currentPage);
+        // this.bookInfo.currentPage = this.locations.start.index;
         this.progress = location.start && location.start.percentage * 100;
         this.nextStatus = location.atEnd ? false : true;
         this.prevStatus = location.atStart ? false : true;
@@ -137,6 +152,79 @@ export default {
     getBookInfo() {
       // 获取图书信息
       this.bookInfo.title = this.book.package.metadata.title;
+    },
+    // 设置主题
+    setBookTheme() {
+      this.themes = this.bookRendition.themes;
+      this.setStyle('fontFamily', 'MicrosoftYaHei', (value) => {
+        this.themes.font(value);
+      });
+      this.setStyle('fontSize', 16, (value) => {
+        this.themes.fontSize(value + 'px');
+      });
+      this.setStyle('lineHeight', 1.2, (value) => {
+        this.registerTheme(value);
+        this.setStyle('background', 'default', (value) => {
+          this.theme = value;
+          this.themes.select(value);
+        });
+      });
+    },
+    // 设置样式并保存在localStorage中
+    setStyle(key, value, done) {
+      if (getLS(key)) {
+        done(getLS(key));
+      } else {
+        setLS(key, value);
+        done(value);
+      }
+    },
+    setFont(value) {
+      this.themes.font(value);
+      setLS('fontFamily', value);
+    },
+    setFontSize(value) {
+      this.themes.fontSize(value + 'px');
+      setLS('fontSize', value);
+    },
+    setLineHeight(value, bg) {
+      this.registerTheme(value);
+      this.themes.select(bg);
+      setLS('lineHeight', value);
+    },
+    setBackground(value) {
+      this.themes.select(value);
+      this.theme = value;
+      setLS('background', value);
+    },
+    // 注册主题
+    registerTheme(value) {
+      this.themes.register({
+        'default': {
+          'body': {
+            'background': '#ffffff', 'color': '#666666',
+          },
+          '*': { 'line-height': value + '!important' },
+        },
+        'bright': {
+          'body': {
+            'background': '#FFDDAA', 'color': '#666666', 'line-height': 2,
+          },
+          '*': { 'line-height': value + '!important' },
+        },
+        'eyeProtection': {
+          'body': {
+            'background': '#BFE2CB', 'color': '#666666', 'line-height': 2,
+          },
+          '*': { 'line-height': value + '!important' },
+        },
+        'night': {
+          'body': {
+            'background': '#141414', 'color': '#FFFFFF', 'line-height': 2,
+          },
+          '*': { 'line-height': value + '!important' },
+        },
+      });
     },
     // 进度条跳转
     onProgressChange(progress) {
@@ -210,6 +298,66 @@ export default {
       this.dialogHandle(() => {
         this.searchStatus = true;
       });
+    },
+    // 搜索关键词
+    search(value) {
+      // let book = this.book;
+      this.searchResult = [];
+      // return new Promise.all( (resolve, reject) => {
+      //   this.book.spine.spineItems.map( item => {
+      //     item.load( this.book.load.bind(this.book))
+      //   }).then( () => {
+      //     item.find.bind(item, value)
+      //   }).catch(() => {
+      //     item.unload.bind(item)
+      //   })
+      // }).then((results) => {
+      //   this.searchResult = Promise.resolve([].concat.apply([], results))
+      // });
+      // console.log(this.searchResult)
+
+      // return Promise.all( book.spine.spineItems.map( item => {
+      //   return new Promise( (resolve, reject) => {
+      //     item.load(book.load.bind(book))
+      //   }).then( results => {
+      //     item.find.bind(item, value)
+      //   }).catch(results => {
+      //     item.unload.bind(item)
+      //   })
+      // })).then(results => {
+      //   console.log(results)
+      //   this.searchResult = Promise.resolve([].concat.apply([], results))
+      //   console.log(this.searchResult)
+      // })
+
+      let book = this.book;
+      return new Promise((resolve, reject) => {
+        var resultPromises = [];
+        for (var i = 0; i < book.spine.spineItems.length; i++) {
+          var spineItem = book.spine.spineItems[i];
+          resultPromises.push(new Promise((resolve, reject) => {
+            return new Promise(function(resolve, reject) {
+              spineItem.load(book.load.bind(book)).then(function() {
+                resolve(spineItem);
+              }).catch(reject);
+            }).then(function(result) {
+              return Promise.resolve(result.find.bind(result, value));
+            }).then(function(result) {
+              resolve(result);
+            });
+          }));
+        }
+        Promise.all(resultPromises).then((results) => {
+          return new Promise((resolve, reject) => {
+            resolve(results);
+            console.log(results)
+            var mergedResults = [].concat.apply([], results);
+            this.searchResult = mergedResults;
+            console.log(mergedResults)
+          });
+        });
+      });
+
     },
     // 设置单/双页模式
     setPageType() {

@@ -9,7 +9,7 @@
 		<div class="theme-container">
 			<el-form ref="form" class="themeBox" label-position="top">
 				<el-form-item label="字体">
-					<el-select v-model="fontType" placeholder="请选择" style="width: 100%">
+					<el-select v-model="fontType" placeholder="请选择" style="width: 100%" @change="setFont">
 						<el-option
 								v-for="(item, index) in fontTypeList"
 								:key="index"
@@ -27,32 +27,36 @@
 				</el-form-item>
 				<el-form-item label="排版">
 					<div class="selectBox clearfix">
-						<p :class="lineHeight === 20 ? 'active':''" @click="setLineHeight(20)">
+						<p :class="lineHeight == 1.2 ? 'active':''" @click="setLineHeight(1.2)">
 							<img src="../../assets/imgs/menu.png" alt="">
 						</p>
-						<p :class="lineHeight === 25 ? 'active':''" @click="setLineHeight(25)">
+						<p :class="lineHeight == 1.6 ? 'active':''" @click="setLineHeight(1.5)">
 							<img src="../../assets/imgs/menu.png" alt="">
 						</p>
-						<p :class="lineHeight === 30 ? 'active':''" @click="setLineHeight(30)">
+						<p :class="lineHeight == 2 ? 'active':''" @click="setLineHeight(1.8)">
 							<img src="../../assets/imgs/menu.png" alt="">
 						</p>
-						<p :class="lineHeight === 35 ? 'active':''" @click="setLineHeight(35)">
+						<p :class="lineHeight == 2.4 ? 'active':''" @click="setLineHeight(2)">
 							<img src="../../assets/imgs/menu.png" alt="">
 						</p>
 					</div>
 				</el-form-item>
 				<el-form-item label="主题">
 					<div class="selectBox clearfix">
-						<p :class="background === '#FFFFFF' ? 'active':''" @click="setBackground('#FFFFFF')">
+						<p :class="background === 'default' ? 'active':''"
+						   @click="setBackground('default')">
 							<span style="background: #FFFFFF"></span>
 						</p>
-						<p :class="background === '#FFDDAA' ? 'active':''" @click="setBackground('#FFDDAA')">
+						<p :class="background === 'bright' ? 'active':''"
+						   @click="setBackground('bright')">
 							<span style="background: #FFDDAA"></span>
 						</p>
-						<p :class="background === '#BFE2CB' ? 'active':''" @click="setBackground('#BFE2CB')">
+						<p :class="background === 'eyeProtection' ? 'active':''"
+						   @click="setBackground('eyeProtection')">
 							<span style="background: #BFE2CB"></span>
 						</p>
-						<p :class="background === '#141414' ? 'active':''" @click="setBackground('#141414')">
+						<p :class="background === 'night' ? 'active':''"
+						   @click="setBackground('night')">
 							<span style="background: #141414"></span>
 						</p>
 					</div>

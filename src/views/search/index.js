@@ -1,27 +1,37 @@
 export default {
   components: {},
   props: {
-    rendition: {
-      type: Object,
+    list: {
+      type: Array,
       default: () => {
-        return {}
-      }
-    }
+        return [];
+      },
+    },
   },
   data() {
     return {
       keyword: null,
     };
   },
+  computed: {
+    arr() {
+
+      return this.list.map( val => {
+        return val()
+      })
+    }
+  },
   created() {
-    this.getCatalogList()
+
   },
   methods: {
     close() {
       this.$emit('closeDialog');
     },
-    search(value) {
-
+    search() {
+      if (this.keyword) {
+        this.$emit('search', this.keyword);
+      }
     },
     getCatalogList() {
       // console.log(this.rendition)
