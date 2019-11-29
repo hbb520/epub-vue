@@ -63,3 +63,43 @@ export function removeBookmarks(id, value) {
     return LocalStorage.setItem(key, JSON.stringify(bookmarksList));
   }
 }
+
+// 笔记对象格式
+// {
+//   "id": Number,
+//   "bookId": Number,
+//   "startCfi": String,
+//   "endCfi": String,
+//   "href": String,
+//   "word": String,
+//   "type": String,  // 'underline', 'annotation', 'underline&annotation',
+//   "underlineColor": String,
+//   "annotation": String,
+//   "createTime": Date,
+// }
+
+export function getNote(id) {
+  let key = 'note-' + id;
+  let list = JSON.parse(LocalStorage.getItem(key)) || []
+  return list;
+}
+
+export function setNote(id, obj) {
+  let key = 'note-' + id;
+  let noteList = getNote(id) || [];
+  note.push(obj);
+  return LocalStorage.setItem(key, JSON.stringify(note));
+}
+
+export function removeNote(id, value) {
+  let key = 'note-' + id;
+  let noteList = getNote(id) || [];
+  noteList = noteList.filter(val => {
+    return val.id !== value;
+  });
+  if (noteList.length <= 0) {
+    return LocalStorage.removeItem(key);
+  } else {
+    return LocalStorage.setItem(key, JSON.stringify(noteList));
+  }
+}

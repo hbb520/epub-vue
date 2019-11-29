@@ -187,4 +187,10 @@
 		width: 80%;
 		max-width: 570px;
 	}
+	[ref='hl']{
+		line {
+			stroke: red;
+			stroke-opacity: 1;
+		}
+	}
 }

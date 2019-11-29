@@ -8,6 +8,9 @@ import {
   setLS,
   getBookmarks,
   setBookmarks,
+  getNote,
+  setNote,
+  removeNote,
 } from '../../utils/auth';
 
 const ePub = window.ePub;
@@ -85,6 +88,7 @@ export default {
         width: '100%',
         height: '100%',
         spread: 'always',
+        ignoreClass: 'annotator-hl',
       });
       this.display = this.bookRendition.display();
       this.bookWidth = document.getElementById('book').clientWidth;
@@ -163,6 +167,70 @@ export default {
       this.bookRendition.on('layout', function(layout) {
         console.log(44444444);
       });
+
+      // this.bookRendition.hooks.content.register(function(contents){
+      //   var loaded = Promise.all([
+      //     contents.addScript("https://code.jquery.com/jquery-2.1.4.min.js"),
+      //     contents.addStylesheet("http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.css")
+      //   ]);
+      //   return loaded;
+      // });
+
+      let timer = null
+      // 选中文字
+      this.bookRendition.on('selected', (cfiRange, contents) => {
+        clearTimeout(timer)
+        console.log(5555);
+        // contents.window.addEventListener('mouseup', e => {});
+        // this.bookRendition.annotations.underline(cfiRange, {},
+        //     (val) => {
+        //       console.log(1234567)
+        //     }, 'annotation', {
+        //       'stroke': 'red',
+        //     });
+        timer = setTimeout(() => {
+          console.log(9999)
+          this.bookRendition.annotations.add('underline', cfiRange, {},
+              (e) => {
+            console.log(101010)
+                // console.log('highlight clicked', e.target);
+                console.log(e.target.querySelector('line').style)
+                e.target.querySelector('line').style.stroke = 'red'
+                e.target.querySelector('line').style.strokeOpacity = '1'
+                e.target.querySelector('rect').style.stroke = 'none'
+              }, 'hl',
+              {
+                'fill-opacity': '1', 'mix-blend-mode': 'multiply',
+                'line': {
+                  'stroke': 'red',
+                },
+              });
+        }, 100)
+
+        // this.bookRendition.themes.add('underline', contents)
+      });
+
+      // this.bookRendition.on('mouseup', event => {
+      //   console.log(this.bookRendition.getContents())
+      //   this.bookRendition.annotations.add('underline', cfiRange, {},
+      //         (e) => {
+      //           // console.log('highlight clicked', e.target);
+      //           console.log(e.target.querySelector('line').style)
+      //           e.target.querySelector('line').style.stroke = 'red'
+      //         }, 'hl',
+      //         {
+      //           'fill-opacity': '1', 'mix-blend-mode': 'multiply',
+      //           'line': {
+      //             'stroke': 'red',
+      //           },
+      //         });
+      // })
+
+      // 点击选中文字
+      this.bookRendition.on('markClicked',
+          function(cfiRange, object, contents) {
+            console.log(66666);
+          });
     },
     // 获取图书信息
     getBookInfo() {
@@ -239,6 +307,19 @@ export default {
             'background': '#141414', 'color': '#FFFFFF', 'line-height': 2,
           },
           '*': { 'line-height': value + '!important' },
+        },
+        'underline': {
+          '::selection': {
+            'background': 'red',
+          },
+          'svg': {
+            'background': 'red!important',
+          },
+          '.annotation': {
+            'fill': 'yellow!important',
+            'fill-opacity': '0.3',
+            'mix-blend-mode': 'multiply',
+          },
         },
       });
     },
