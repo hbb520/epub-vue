@@ -68,7 +68,7 @@
 			       @setFont="setFont" @setFontSize="setFontSize"
 			       @setLineHeight="setLineHeight" @setBackground="setBackground"></theme>
 			<search v-if="searchStatus" @closeDialog="dialogHandle" :list.sync="searchResult"
-			        @search="search"></search>
+			        @search="search" @gotoResult="gotoBookmarks"></search>
 		</mu-drawer>
 	</div>
 </template>

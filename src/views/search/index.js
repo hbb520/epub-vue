@@ -11,30 +11,41 @@ export default {
   data() {
     return {
       keyword: null,
+      loading: false,
     };
   },
   computed: {
-    arr() {
-
-      return this.list.map( val => {
-        return val()
-      })
-    }
+    result() {
+      if (this.list.length > 0) {
+        return this.list.map(val => {
+          let html = val.excerpt.split(this.keyword).
+              join(`<span style="color: #048D01">${ this.keyword }</span>`);
+          return {
+            html: html,
+            ...val,
+          };
+        });
+      } else {
+        return [];
+      }
+    },
   },
   created() {
-
   },
   methods: {
     close() {
-      this.$emit('closeDialog');
+      this.$emit('closeDialog', null, true);
     },
     search() {
       if (this.keyword) {
-        this.$emit('search', this.keyword);
+      this.loading = true
+      this.$emit('search', this.keyword, () => {
+        this.loading = false
+      });
       }
     },
-    getCatalogList() {
-      // console.log(this.rendition)
+    gotoResult(cfi) {
+      this.$emit('gotoResult', cfi);
     },
     init() {
 

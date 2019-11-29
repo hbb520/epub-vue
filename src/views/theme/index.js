@@ -48,7 +48,7 @@ export default {
   },
   methods: {
     close() {
-      this.$emit('closeDialog');
+      this.$emit('closeDialog', null, true);
     },
     getTheme() {
       this.fontType = getLS('fontFamily')

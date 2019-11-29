@@ -7,7 +7,6 @@
 
 	.search-container {
 		width: calc(100% + 17px);
-		height: 100%;
 		position: relative;
 		overflow-x: hidden;
 		overflow-y: auto;
@@ -32,12 +31,7 @@
 					color: #333333;
 					font-size: 18px;
 					line-height: 30px;
-					&:before {
-						content: '...';
-					}
-					span {
-						color: #048D01;
-					}
+					cursor: pointer;
 				}
 			}
 		}

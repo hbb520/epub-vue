@@ -121,8 +121,6 @@ export default {
       this.bookRendition.on('relocated', location => {
         console.log(333333);
         this.locations = location;
-        console.log(this.book.navigation);
-        console.log(this.locations);
         this.bookInfo.totalPage = this.book.navigation.toc.length;
         let currentPage = this.book.navigation.toc.map((val, ind) => {
           return {
@@ -133,16 +131,34 @@ export default {
           return val.href === this.locations.start.href;
         })[0];
         this.bookInfo.currentPage = currentPage && currentPage.index + 1;
-        console.log(this.bookInfo.currentPage);
-        // this.bookInfo.currentPage = this.locations.start.index;
         this.progress = location.start && location.start.percentage * 100;
         this.nextStatus = location.atEnd ? false : true;
         this.prevStatus = location.atStart ? false : true;
-        this.bookmarksStatus = getBookmarks(this.id).some(val => {
-          return val.cfi === location.start.cfi;
+        this.bookmarksStatus = false;
+        Promise.all(getBookmarks(this.id).map(item => {
+          return new Promise((resolve, reject) => {
+            this.search(item.word, results => {
+              resolve(results);
+            });
+          });
+        })).then(results => {
+          let resultArr = results.reduce((item1, item2) => {
+            return item1.concat(item2);
+          }, []);
+          if (resultArr.length === 1) {
+            let resultLocations = this.book.locations.locationFromCfi(
+                resultArr[0].cfi);
+            let startLocations = this.book.locations.locationFromCfi(
+                location.start.cfi);
+            let endLocations = this.book.locations.locationFromCfi(
+                location.end.cfi);
+            if (resultLocations >= startLocations && resultLocations <
+                endLocations) {
+              this.bookmarksStatus = true;
+            }
+          }
         });
       });
-
       // 布局变化
       this.bookRendition.on('layout', function(layout) {
         console.log(44444444);
@@ -264,17 +280,19 @@ export default {
       if (this.bookmarksStatus) {
         return true;
       }
-      let obj = this.locations && this.locations.start;
-      let content = this.bookRendition.getRange(obj.cfi) &&
-          this.bookRendition.getRange(obj.cfi).commonAncestorContainer;
+      let objStart = this.locations && this.locations.start;
+      let objEnd = this.locations && this.locations.end;
+      let content = this.bookRendition.getRange(objStart.cfi) &&
+          this.bookRendition.getRange(objStart.cfi).commonAncestorContainer;
       let word = content && content.data;
       let isSign = word.split(' ').some(val => val === '\n');
       if ( !isSign) {
         setBookmarks(this.id, {
           id: this.id + new Date().getTime(),
           bookId: this.id,
-          cfi: obj.cfi,
-          href: obj.href,
+          startCfi: objStart.cfi,
+          endCfi: objEnd.cfi,
+          href: objStart.href,
           word: word,
           createTime: new Date().getTime(),
         });
@@ -284,6 +302,7 @@ export default {
     // 书签跳转
     gotoBookmarks(cfi) {
       this.bookRendition.display(cfi);
+      this.dialogHandle(null, true);
     },
     // 打开选项弹框
     spellcheck_click() {
@@ -295,69 +314,33 @@ export default {
     // 打开搜索弹框
     search_click() {
       this.drawer_open = true;
+      this.searchResult = [];
       this.dialogHandle(() => {
         this.searchStatus = true;
       });
     },
     // 搜索关键词
-    search(value) {
-      // let book = this.book;
-      this.searchResult = [];
-      // return new Promise.all( (resolve, reject) => {
-      //   this.book.spine.spineItems.map( item => {
-      //     item.load( this.book.load.bind(this.book))
-      //   }).then( () => {
-      //     item.find.bind(item, value)
-      //   }).catch(() => {
-      //     item.unload.bind(item)
-      //   })
-      // }).then((results) => {
-      //   this.searchResult = Promise.resolve([].concat.apply([], results))
-      // });
-      // console.log(this.searchResult)
-
-      // return Promise.all( book.spine.spineItems.map( item => {
-      //   return new Promise( (resolve, reject) => {
-      //     item.load(book.load.bind(book))
-      //   }).then( results => {
-      //     item.find.bind(item, value)
-      //   }).catch(results => {
-      //     item.unload.bind(item)
-      //   })
-      // })).then(results => {
-      //   console.log(results)
-      //   this.searchResult = Promise.resolve([].concat.apply([], results))
-      //   console.log(this.searchResult)
-      // })
-
+    search(value, done) {
       let book = this.book;
-      return new Promise((resolve, reject) => {
-        var resultPromises = [];
-        for (var i = 0; i < book.spine.spineItems.length; i++) {
-          var spineItem = book.spine.spineItems[i];
-          resultPromises.push(new Promise((resolve, reject) => {
-            return new Promise(function(resolve, reject) {
-              spineItem.load(book.load.bind(book)).then(function() {
-                resolve(spineItem);
-              }).catch(reject);
-            }).then(function(result) {
-              return Promise.resolve(result.find.bind(result, value));
-            }).then(function(result) {
-              resolve(result);
+      Promise.all(book.spine.spineItems.map(item => {
+            return new Promise((resolve, reject) => {
+              item.load(book.load.bind(book)).then(result => {
+                resolve(item.find.bind(item, value));
+              }).catch(results => {
+                item.unload.bind(item);
+              });
             });
-          }));
-        }
-        Promise.all(resultPromises).then((results) => {
-          return new Promise((resolve, reject) => {
-            resolve(results);
-            console.log(results)
-            var mergedResults = [].concat.apply([], results);
-            this.searchResult = mergedResults;
-            console.log(mergedResults)
-          });
+          }),
+      ).then(results => {
+        Promise.all(results).then(results => {
+          this.searchResult = results.map(item => {
+            return item();
+          }).reduce((item1, item2) => {
+            return item1.concat(item2);
+          }, []);
+          done && done(this.searchResult);
         });
       });
-
     },
     // 设置单/双页模式
     setPageType() {

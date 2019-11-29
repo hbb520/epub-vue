@@ -19,7 +19,8 @@ export function removeToken() {
 // {
 //   "id": Number,
 //   "bookId": Number,
-//   "cfi": String,
+//   "startCfi": String,
+//   "endCfi": String,
 //   "href": String,
 //   "word": String,
 //   "createTime": Date,

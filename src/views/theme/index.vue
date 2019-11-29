@@ -30,13 +30,13 @@
 						<p :class="lineHeight == 1.2 ? 'active':''" @click="setLineHeight(1.2)">
 							<img src="../../assets/imgs/menu.png" alt="">
 						</p>
-						<p :class="lineHeight == 1.6 ? 'active':''" @click="setLineHeight(1.5)">
+						<p :class="lineHeight == 1.6 ? 'active':''" @click="setLineHeight(1.6)">
 							<img src="../../assets/imgs/menu.png" alt="">
 						</p>
-						<p :class="lineHeight == 2 ? 'active':''" @click="setLineHeight(1.8)">
+						<p :class="lineHeight == 2 ? 'active':''" @click="setLineHeight(2)">
 							<img src="../../assets/imgs/menu.png" alt="">
 						</p>
-						<p :class="lineHeight == 2.4 ? 'active':''" @click="setLineHeight(2)">
+						<p :class="lineHeight == 2.4 ? 'active':''" @click="setLineHeight(2.4)">
 							<img src="../../assets/imgs/menu.png" alt="">
 						</p>
 					</div>
@@ -93,6 +93,7 @@
 
 				i {
 					width: 80px;
+					cursor: pointer;
 				}
 
 				p {

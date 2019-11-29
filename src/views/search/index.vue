@@ -6,30 +6,22 @@
 				<p>搜索</p>
 			</div>
 		</mu-bottom-nav>
-		<div class="search-container">
+		<div class="search-container" v-loading="loading">
 			<div class="box">
 				<mu-text-field v-model="keyword" placeholder="全文搜索" action-icon="search"
 				               :action-click="search" style="width: 100%"></mu-text-field>
 			</div>
-			<div class="list">
-				<div class="result clearfix">
-					<p class="wordOverflow3">渐渐地，我们又鼓起了勇气，决定渐渐地，
-						<span>搜索</span>
-						我们又鼓起了勇气，决定渐渐地，我们又鼓起了勇气，决定渐渐地，我们又鼓起了勇气，决定渐渐地，我们又鼓起了勇气，决定我们又鼓起了勇气，决定</p>
-				</div>
-				<div class="result clearfix">
-					<p class="wordOverflow3">渐渐地，我们又鼓起了勇气，决定渐渐地，
-						<span>搜索</span>
-						我们又鼓起了勇气，决定渐渐地，我们又鼓起了勇气，决定渐渐地，我们又鼓起了勇气，决定渐渐地，我们又鼓起了勇气，决定我们又鼓起了勇气，决定</p>
+			<div class="list" v-if="result.length > 0">
+				<div class="result clearfix" v-for="(item, index) in result" :key="index">
+					<p class="wordOverflow3" @click="gotoResult(item.cfi)" v-html="item.html"></p>
 				</div>
 			</div>
-			<div>{{ arr }}</div>
-<!--			<div class="noContent">-->
-<!--				<p>请输入搜索内容</p>-->
-<!--			</div>-->
-<!--			<div class="noResult">-->
-<!--				<p>请输入搜索内容</p>-->
-<!--			</div>-->
+			<div class="noContent"  v-if="result.length === 0 && keyword === null">
+				<p>请输入搜索内容</p>
+			</div>
+			<div class="noContent"  v-if="result.length === 0 && keyword !== null">
+				<p>没有搜索到结果</p>
+			</div>
 		</div>
 	</div>
 </template>
@@ -57,6 +49,7 @@
 				}
 				i {
 					width: 80px;
+					cursor: pointer;
 				}
 				p {
 					width: calc(100% - 80px);
