@@ -60,7 +60,8 @@
 
 		<progress-slider v-if="progress !== null" :progress.sync="progress" :tips="progressTips"
 		                 @change="onProgressChange"></progress-slider>
-		<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container" @close="dialogHandle">
+		<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container"
+		           @close="dialogHandle">
 			<catalog v-if="catalogStatus" :id="id" :chapterList="book.navigation.toc" :currentChapter="currentChapter"
 			         @closeDialog="dialogHandle" @goToChapter="goToChapter"
 			         @gotoBookmarks="gotoBookmarks"></catalog>
@@ -70,6 +71,35 @@
 			<search v-if="searchStatus" @closeDialog="dialogHandle" :list.sync="searchResult"
 			        @search="search" @gotoResult="gotoBookmarks"></search>
 		</mu-drawer>
+
+		<div id="toolTips" v-if="toolTipsStatus" :style="{'top': toolTipsMode === 'add' ? (toolTipsTop + 60 + 'px') : (toolTipsTop + 'px'),
+		'left': toolTipsLeft + 'px', 'height': toolTipsMode === 'add' ? '60px' : '120px'}">
+			<div class="colorList clearfix" v-if="toolTipsMode === 'edit'">
+				<p :class="selectedColorClassName === 'green' ? 'active' : ''">
+					<span style="background: #1CB555" @click="changeUnderlineColor('green')"></span></p>
+				<p :class="selectedColorClassName === 'orange' ? 'active' : ''">
+					<span style="background: #F19149" @click="changeUnderlineColor('orange')"></span></p>
+				<p :class="selectedColorClassName === 'blue' ? 'active' : ''">
+					<span style="background: #00A0E9" @click="changeUnderlineColor('blue')"></span></p>
+				<p :class="selectedColorClassName === 'violet' ? 'active' : ''">
+					<span style="background: #C490BF" @click="changeUnderlineColor('violet')"></span></p>
+			</div>
+			<div class="tool clearfix">
+				<p @click="copyWord()">复制</p>
+				<p @click="share()">分享</p>
+				<p v-if="toolTipsMode === 'add'" @click="createUnderline()">划线</p>
+				<p v-if="toolTipsMode === 'edit'" @click="clearUnderline()">清除</p>
+				<p @click="openAnnotateDialog()">批注</p>
+			</div>
+		</div>
+		<div id="annotate" :class="annotateShowAtTheBottom ? '' : 'top'" v-if="annotateStatus"
+		     :style="{'top': annotateTop + 'px', 'left': annotateLeft + 'px'}">
+			<p>批注</p>
+			<span class="wordOverflow">{{ currentHandleWord }}</span>
+			<el-input type="textarea" v-model="annotateWord" :rows="5"></el-input>
+			<p class="complete" @click="createAnnotate()">完 成</p>
+		</div>
+		<p class="test" :style="{'top': top + 'px', 'left': left + 'px'}"></p>
 	</div>
 </template>
 
@@ -115,14 +145,57 @@
 				}
 			}
 		}
+
 		.mu-paper {
-			z-index: 2100!important;
+			z-index: 2100 !important;
 		}
 
 		@media (min-width: 600px) {
 			#progress {
 				height: calc(100vh - 100px);
 				top: 82px;
+			}
+		}
+
+		#annotate {
+
+		}
+
+		.epub-view {
+			svg {
+				g{
+					rect {
+						stroke: none;
+					}
+					line {
+						stroke-opacity: 1;
+					}
+					&.default {
+						line {
+							stroke: #3652F8;
+						}
+					}
+					&.green {
+						line {
+							stroke: #1CB555;
+						}
+					}
+					&.orange {
+						line {
+							stroke: #F19149;
+						}
+					}
+					&.blue {
+						line {
+							stroke: #00A0E9;
+						}
+					}
+					&.violet {
+						line {
+							stroke: #C490BF;
+						}
+					}
+				}
 			}
 		}
 	}

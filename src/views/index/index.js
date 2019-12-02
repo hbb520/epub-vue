@@ -41,12 +41,30 @@ export default {
       currentChapter: null,
       bookmarksStatus: false,
       bookWidth: 0,
+      bookHeight: 0,
       singlePageStatus: false,
       themeStatus: false,
       theme: null,
       searchStatus: false,
       searchResult: [],
       fullScreenStatus: false,
+      toolTipsStatus: false,
+      toolTipsMode: 'add', // 'add' || 'edit'
+      toolTipsTop: 0,
+      toolTipsLeft: 0,
+      selectedInfo: {},
+      selectedCfi: null,
+      selectedContents: null,
+      selectedColorClassName: null,
+      currentHandleWord: null,
+      currentHandleAnnotateWrod: null,
+      annotateStatus: false,
+      annotateShowAtTheBottom: true,
+      annotateTop: 0,
+      annotateLeft: 0,
+      annotateWord: null,
+      top: 0,
+      left: 0,
     };
   },
   components: {
@@ -92,6 +110,7 @@ export default {
       });
       this.display = this.bookRendition.display();
       this.bookWidth = document.getElementById('book').clientWidth;
+      this.bookHeight = document.getElementById('book').clientHeight;
       this.screenWidthChange();
       this.renderInit();
     },
@@ -139,29 +158,67 @@ export default {
         this.nextStatus = location.atEnd ? false : true;
         this.prevStatus = location.atStart ? false : true;
         this.bookmarksStatus = false;
+        let startLocations = this.book.locations.locationFromCfi(
+            location.start.cfi);
+        let endLocations = this.book.locations.locationFromCfi(
+            location.end.cfi);
+
         Promise.all(getBookmarks(this.id).map(item => {
           return new Promise((resolve, reject) => {
-            this.search(item.word, results => {
+            this.chapterSearch(item.word, location.start.index, results => {
               resolve(results);
             });
           });
         })).then(results => {
-          let resultArr = results.reduce((item1, item2) => {
+          this.bookmarksStatus = results.reduce((item1, item2) => {
             return item1.concat(item2);
-          }, []);
-          if (resultArr.length === 1) {
-            let resultLocations = this.book.locations.locationFromCfi(
-                resultArr[0].cfi);
-            let startLocations = this.book.locations.locationFromCfi(
-                location.start.cfi);
-            let endLocations = this.book.locations.locationFromCfi(
-                location.end.cfi);
-            if (resultLocations >= startLocations && resultLocations <
-                endLocations) {
-              this.bookmarksStatus = true;
-            }
-          }
+          }, []).some(obj => {
+            let bookmarksLocations = this.book.locations.locationFromCfi(
+                obj.cfi);
+            return bookmarksLocations >= startLocations && bookmarksLocations <
+                endLocations;
+          });
         });
+
+        let noteList = getNote(this.id);
+        for (let i = 0; i < noteList.length; i++) {
+          new Promise((resolve, reject) => {
+            this.chapterSearch(noteList[i].word, location.start.index,
+                results => {
+                  resolve(results);
+                });
+          }).then(results => {
+            let noteStatus = results.some(obj => {
+              let resultLocations = this.book.locations.locationFromCfi(
+                  obj.cfi);
+              return resultLocations >= startLocations && resultLocations <
+                  endLocations;
+            });
+            if (noteStatus) {
+              this.bookRendition.annotations.add('underline', noteList[i].cfi, {
+                cfiRange: noteList[i].cfi,
+                className: noteList[i].underlineClass,
+                annotation: noteList[i].annotation,
+              }, () => {}, 'default', {});
+            }
+          });
+        }
+
+        // Promise.all(getNote(this.id).map(item => {
+        //   return new Promise((resolve, reject) => {
+        //     this.chapterSearch(item.annotation, location.start.index, results => {
+        //       resolve(results);
+        //     });
+        //   });
+        // })).then(results => {
+        //   this.bookmarksStatus = results.reduce((item1, item2) => {
+        //     return item1.concat(item2);
+        //   }, []).some( obj => {
+        //     let resultLocations = this.book.locations.locationFromCfi(obj.cfi);
+        //     return resultLocations >= startLocations && resultLocations < endLocations
+        //   })
+        // });
+
       });
       // 布局变化
       this.bookRendition.on('layout', function(layout) {
@@ -176,61 +233,203 @@ export default {
       //   return loaded;
       // });
 
-      let timer = null
+      // let timer = null
+      let isSelected = false;
+      let that = this;
       // 选中文字
       this.bookRendition.on('selected', (cfiRange, contents) => {
-        clearTimeout(timer)
-        console.log(5555);
-        // contents.window.addEventListener('mouseup', e => {});
-        // this.bookRendition.annotations.underline(cfiRange, {},
-        //     (val) => {
-        //       console.log(1234567)
-        //     }, 'annotation', {
-        //       'stroke': 'red',
-        //     });
-        timer = setTimeout(() => {
-          console.log(9999)
-          this.bookRendition.annotations.add('underline', cfiRange, {},
-              (e) => {
-            console.log(101010)
-                // console.log('highlight clicked', e.target);
-                console.log(e.target.querySelector('line').style)
-                e.target.querySelector('line').style.stroke = 'red'
-                e.target.querySelector('line').style.strokeOpacity = '1'
-                e.target.querySelector('rect').style.stroke = 'none'
-              }, 'hl',
-              {
-                'fill-opacity': '1', 'mix-blend-mode': 'multiply',
-                'line': {
-                  'stroke': 'red',
-                },
-              });
-        }, 100)
+        let range = contents.range(cfiRange);
+        // let otherRange = range.cloneRange()
+        // otherRange.collapse(false)
+        let rangeObj = range.getBoundingClientRect();
+        // let otherRangeObj = otherRange.getBoundingClientRect();
+        // console.log(rangeObj)
+        // this.top = otherRangeObj.top + 186
+        // this.left = otherRangeObj.left + 178
+        this.selectedCfi = cfiRange;
+        this.selectedContents = contents;
+        this.selectedInfo = rangeObj;
+        this.toolTipsTop = rangeObj.top + 55;
+        this.toolTipsLeft = rangeObj.left + 30 + rangeObj.width / 2;
+        this.toolTipsStatus = true;
+        this.toolTipsMode = 'add';
+        this.book.getRange(cfiRange).then((range) => {
+          this.currentHandleWord = range.toString();
+        });
+      });
+      //   isSelected = true
+      //   console.log(this.bookRendition.annotations)
+      //   // clearTimeout(timer)
+      //   console.log(5555);
+      //   console.log(contents.window.querySelector('svg'));
+      //   contents.window.addEventListener('mouseup', e => {
+      //     if(!isSelected){
+      //       return true
+      //     }
 
-        // this.bookRendition.themes.add('underline', contents)
+      // this.bookRendition.annotations.underline(cfiRange, {},
+      //     (val) => {
+      //       console.log(1234567)
+      //     }, 'annotation', {
+      //       'stroke': 'red',
+      //     });
+      // timer = setTimeout(() => {
+      //   console.log(9999)
+      //   that.bookRendition.annotations.add('underline', cfiRange, {},
+      //       (e) => {
+      //         console.log(101010)
+      //
+      //         console.log(e.target)
+      //         // console.log('highlight clicked', e.target);
+      //         console.log(e.target.querySelector('line').style)
+      //         e.target.querySelector('line').style.stroke = 'red'
+      //         e.target.querySelector('line').style.strokeOpacity = '1'
+      //         e.target.querySelector('rect').style.stroke = 'none'
+      //       }, 'hl',
+      //       {
+      //         'fill-opacity': '1', 'mix-blend-mode': 'multiply',
+      //         'line': {
+      //           'stroke': 'red',
+      //         },
+      //       });
+      //   isSelected = false
+      // });
+      // }, 100)
+
+      // this.bookRendition.themes.add('underline', contents)
+
+      this.bookRendition.on('mouseup', (event, contents) => {
+        this.toolTipsStatus = false;
+        this.annotateStatus = false;
       });
 
-      // this.bookRendition.on('mouseup', event => {
-      //   console.log(this.bookRendition.getContents())
-      //   this.bookRendition.annotations.add('underline', cfiRange, {},
-      //         (e) => {
-      //           // console.log('highlight clicked', e.target);
-      //           console.log(e.target.querySelector('line').style)
-      //           e.target.querySelector('line').style.stroke = 'red'
-      //         }, 'hl',
-      //         {
-      //           'fill-opacity': '1', 'mix-blend-mode': 'multiply',
-      //           'line': {
-      //             'stroke': 'red',
-      //           },
-      //         });
-      // })
-
       // 点击选中文字
-      this.bookRendition.on('markClicked',
-          function(cfiRange, object, contents) {
-            console.log(66666);
-          });
+      this.bookRendition.on('markClicked', (cfiRange, object, contents) => {
+        console.log(cfiRange);
+        console.log(object);
+        console.log(contents);
+        let range = contents.range(cfiRange);
+        let rangeObj = range.getBoundingClientRect();
+        this.selectedCfi = cfiRange;
+        this.selectedContents = contents;
+        this.selectedInfo = rangeObj;
+        this.selectedColorClassName = object && object.className;
+        this.currentHandleAnnotateWrod = object.annotate
+            ? object.annotate
+            : null;
+        this.toolTipsTop = rangeObj.top + 55;
+        this.toolTipsLeft = rangeObj.left + 30 + rangeObj.width / 2;
+        this.toolTipsStatus = true;
+        this.toolTipsMode = 'edit';
+        this.book.getRange(cfiRange).then((range) => {
+          this.currentHandleWord = range.toString();
+        });
+      });
+    },
+
+    // 复制文字
+    copyWord() {
+      let oInput = document.createElement('input');
+      oInput.value = this.currentHandleWord;
+      document.body.appendChild(oInput);
+      oInput.select();
+      document.execCommand('Copy');
+      oInput.style.display = 'none';
+      document.body.removeChild(oInput);
+      this.toolTipsStatus = false;
+      this.$message.info('复制成功！');
+    },
+    // 分享
+    share() {
+      this.toolTipsStatus = false;
+      this.$message.info('分享成功！');
+    },
+    // 划线
+    createUnderline() {
+      this.bookRendition.annotations.add('underline', this.selectedCfi, {
+        cfiRange: this.selectedCfi,
+        className: 'default',
+        annotation: '',
+      }, () => {}, 'default', {});
+      setNote(this.id, {
+        id: this.id + new Date().getTime(),
+        bookId: this.id,
+        cfi: this.selectedCfi,
+        word: this.currentHandleWord,
+        type: 'underline',  // 'underline', 'annotation'
+        underlineClass: 'default',
+        annotation: '',
+        createTime: new Date().getTime(),
+      });
+      this.toolTipsStatus = false;
+    },
+    // 更换下划线颜色
+    changeUnderlineColor(value) {
+      this.bookRendition.annotations.remove(this.selectedCfi, 'underline');
+      this.bookRendition.annotations.add('underline', this.selectedCfi, {
+        cfiRange: this.selectedCfi,
+        className: value,
+        annotation: this.currentHandleAnnotateWrod,
+      }, () => {}, value, {});
+      removeNote(this.id, this.selectedCfi);
+      setNote(this.id, {
+        id: this.id + new Date().getTime(),
+        bookId: this.id,
+        cfi: this.selectedCfi,
+        word: this.currentHandleWord,
+        type: 'underline',  // 'underline', 'annotation'
+        underlineClass: value,
+        annotation: this.currentHandleAnnotateWrod,
+        createTime: new Date().getTime(),
+      });
+      this.toolTipsStatus = false;
+    },
+    // 清除划线
+    clearUnderline() {
+      this.bookRendition.annotations.remove(this.selectedCfi, 'underline');
+      removeNote(this.id, this.selectedCfi);
+      this.toolTipsStatus = false;
+    },
+    // 打开批注编辑框
+    openAnnotateDialog() {
+      this.toolTipsStatus = false;
+      let top = this.selectedInfo.top + 195 + this.selectedInfo.height;
+      if ((top + 270) > document.body.clientHeight) {
+        this.annotateShowAtTheBottom = false;
+        this.annotateTop = top - 270 - this.selectedInfo.height - 20;
+      } else {
+        this.annotateShowAtTheBottom = true;
+        this.annotateTop = top;
+      }
+      this.annotateLeft = this.selectedInfo.left + 180 +
+          this.selectedInfo.width / 2 - 250;
+      this.annotateStatus = true;
+      this.annotateWord = this.currentHandleAnnotateWrod;
+    },
+    // 批注
+    createAnnotate() {
+      if (this.annotateWord === null) {
+        this.$message.warning('内容不能为空!');
+      }
+      this.bookRendition.annotations.remove(this.selectedCfi, 'underline');
+      removeNote(this.id, this.selectedCfi);
+      this.bookRendition.annotations.add('underline', this.selectedCfi, {
+        cfiRange: this.selectedCfi,
+        className: 'default',
+        annotation: this.annotateWord,
+      }, () => {}, 'default', {});
+      setNote(this.id, {
+        id: this.id + new Date().getTime(),
+        bookId: this.id,
+        cfi: this.selectedCfi,
+        word: this.currentHandleWord,
+        type: 'underline',  // 'underline', 'annotation'
+        underlineClass: 'default',
+        annotation: this.annotateWord,
+        createTime: new Date().getTime(),
+      });
+      this.annotateStatus = false;
+      this.currentHandleWord = null;
     },
     // 获取图书信息
     getBookInfo() {
@@ -288,11 +487,17 @@ export default {
           'body': {
             'background': '#ffffff', 'color': '#666666',
           },
+          '::selection': {
+            'background': 'rgba(250,205,137,0.3)',
+          },
           '*': { 'line-height': value + '!important' },
         },
         'bright': {
           'body': {
             'background': '#FFDDAA', 'color': '#666666', 'line-height': 2,
+          },
+          '::selection': {
+            'background': 'rgba(250,205,137,0.3)',
           },
           '*': { 'line-height': value + '!important' },
         },
@@ -300,26 +505,19 @@ export default {
           'body': {
             'background': '#BFE2CB', 'color': '#666666', 'line-height': 2,
           },
+          '::selection': {
+            'background': 'rgba(250,205,137,0.3)',
+          },
           '*': { 'line-height': value + '!important' },
         },
         'night': {
           'body': {
             'background': '#141414', 'color': '#FFFFFF', 'line-height': 2,
           },
-          '*': { 'line-height': value + '!important' },
-        },
-        'underline': {
           '::selection': {
-            'background': 'red',
+            'background': 'rgba(250,205,137,0.3)',
           },
-          'svg': {
-            'background': 'red!important',
-          },
-          '.annotation': {
-            'fill': 'yellow!important',
-            'fill-opacity': '0.3',
-            'mix-blend-mode': 'multiply',
-          },
+          '*': { 'line-height': value + '!important' },
         },
       });
     },
@@ -423,6 +621,22 @@ export default {
         });
       });
     },
+    // 搜索关键词(限制当前章节)
+    chapterSearch(value, index, done) {
+      let book = this.book;
+      let spine = book.spine.spineItems.filter(val => {
+        return val.index === index;
+      })[0];
+      return new Promise((resolve, reject) => {
+        spine.load(book.load.bind(book)).then(result => {
+          resolve(spine.find.bind(spine, value));
+        }).catch(results => {
+          spine.unload.bind(spine);
+        });
+      }).then(results => {
+        done && done(results());
+      });
+    },
     // 设置单/双页模式
     setPageType() {
       let width = document.body.clientWidth;
@@ -440,6 +654,8 @@ export default {
       window.onresize = () => {
         this.bookWidth = document.getElementById('book').clientWidth;
         this.bookRendition.resize(this.bookWidth);
+        this.toolTipsStatus = false;
+        this.annotateStatus = false;
         this.singlePageStatus = this.bookWidth < 800
             ? false
             : this.singlePageStatus;

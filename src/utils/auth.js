@@ -68,15 +68,14 @@ export function removeBookmarks(id, value) {
 // {
 //   "id": Number,
 //   "bookId": Number,
-//   "startCfi": String,
-//   "endCfi": String,
-//   "href": String,
+//   "cfi": String,
 //   "word": String,
-//   "type": String,  // 'underline', 'annotation', 'underline&annotation',
-//   "underlineColor": String,
+//   "type": String,  // 'underline', 'annotation'
+//   "underlineClass": String,
 //   "annotation": String,
 //   "createTime": Date,
 // }
+
 
 export function getNote(id) {
   let key = 'note-' + id;
@@ -87,15 +86,15 @@ export function getNote(id) {
 export function setNote(id, obj) {
   let key = 'note-' + id;
   let noteList = getNote(id) || [];
-  note.push(obj);
-  return LocalStorage.setItem(key, JSON.stringify(note));
+  noteList.push(obj);
+  return LocalStorage.setItem(key, JSON.stringify(noteList));
 }
 
 export function removeNote(id, value) {
   let key = 'note-' + id;
   let noteList = getNote(id) || [];
   noteList = noteList.filter(val => {
-    return val.id !== value;
+    return val.cfi !== value;
   });
   if (noteList.length <= 0) {
     return LocalStorage.removeItem(key);
