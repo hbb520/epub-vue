@@ -6,22 +6,29 @@
 				<mu-icon value="navigate_before"></mu-icon>
 			</mu-button>
 			<mu-button flat slot="right" @click="menu_click">
-				<mu-icon value="menu"></mu-icon>
+<!--				<mu-icon value="menu"></mu-icon>-->
+				<i class="iconfont menuIcon iconmenu"></i>
 			</mu-button>
 			<mu-button flat slot="right" @click="spellcheck_click">
-				<mu-icon value="spellcheck"></mu-icon>
+<!--				<mu-icon value="spellcheck"></mu-icon>-->
+				<i class="iconfont menuIcon iconfontsize"></i>
 			</mu-button>
 			<mu-button flat slot="right" @click="setPageType">
-				<mu-icon value="library_books"></mu-icon>
+<!--				<mu-icon value="library_books"></mu-icon>-->
+				<i class="iconfont menuIcon icondoublepage" v-if="!singlePageStatus"></i>
+				<i class="iconfont menuIcon iconpage" v-if="singlePageStatus"></i>
 			</mu-button>
 			<mu-button flat slot="right" @click="search_click">
-				<mu-icon value="search"></mu-icon>
+<!--				<mu-icon value="search"></mu-icon>-->
+				<i class="iconfont menuIcon iconsearch"></i>
 			</mu-button>
 			<mu-button flat slot="right" @click="setBookmarks">
-				<mu-icon value="bookmark_border"></mu-icon>
+<!--				<mu-icon value="bookmark_border"></mu-icon>-->
+				<i class="iconfont menuIcon icontagtool"></i>
 			</mu-button>
 			<mu-button flat slot="right" @click="setFullscreen">
-				<mu-icon value="crop_free"></mu-icon>
+<!--				<mu-icon value="crop_free"></mu-icon>-->
+				<i class="iconfont menuIcon iconfullscreen"></i>
 			</mu-button>
 			<!--      </div>-->
 		</mu-appbar>
@@ -44,7 +51,9 @@
 						<i class="iconfont iconsign" v-if="bookmarksStatus"></i>
 						<span>{{ bookInfo.currentChapter }}</span>
 					</div>
-					<div id="book" v-loading="bookLoading"></div>
+					<div id="book" v-loading="bookLoading" element-loading-text="图书加载中, 请耐心等待..."
+					     element-loading-spinner="el-icon-loading"
+					     element-loading-background="rgba(0, 0, 0, 0.6)"></div>
 					<div class="bottom">
 						<span v-if="bookInfo.currentPage && bookInfo.totalPage && !singlePageStatus">
 							{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
@@ -64,7 +73,8 @@
 		           @close="dialogHandle">
 			<catalog v-if="catalogStatus" :id="id" :chapterList="book.navigation.toc" :currentChapter="currentChapter"
 			         @closeDialog="dialogHandle" @goToChapter="goToChapter"
-			         @gotoBookmarks="gotoBookmarks"></catalog>
+			         @gotoBookmarks="gotoBookmarks" @gotoNote="gotoBookmarks"
+			         @bookmarksChange="bookmarksChange" @noteChange="noteChange"></catalog>
 			<theme v-if="themeStatus" @closeDialog="dialogHandle"
 			       @setFont="setFont" @setFontSize="setFontSize"
 			       @setLineHeight="setLineHeight" @setBackground="setBackground"></theme>
@@ -99,7 +109,22 @@
 			<el-input type="textarea" v-model="annotateWord" :rows="5"></el-input>
 			<p class="complete" @click="createAnnotate()">完 成</p>
 		</div>
-		<p class="test" :style="{'top': top + 'px', 'left': left + 'px'}"></p>
+		<div id="noteTipsList">
+<!--			noteTipsList-->
+			<div id="noteTips" v-for="(item, index) in noteTipsList" :key="index" :class="item.underlineClass" :style="{'top': item.top + 'px','left': item.left + 'px'}"
+			     @click="item.isShowed = !item.isShowed">
+				<span></span>
+				<span></span>
+				<span></span>
+				<div v-if="item.isShowed"><p class="wordOverflow">{{ item.annotation }}</p></div>
+			</div>
+		</div>
+		<div id="imgDialog" v-if="imgDialogStatus" @click="imgDialogStatus = false">
+			<img :src="imgSrc" alt="">
+		</div>
+		<div id="message" v-if="messageStatus">
+			<p class="wordOverflow">{{ messageContent }}</p>
+		</div>
 	</div>
 </template>
 

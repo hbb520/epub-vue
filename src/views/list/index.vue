@@ -9,20 +9,22 @@
 				在线书城
 			</div>
 		</mu-appbar>
-		<ul class="book-list-ul">
+		<ul class="book-list-ul clearfix">
 			<li class="item" v-for="(item, index) in bookList" :key="index">
-				<div class="img-box" @click="$goLink('/index', {'id': item.id})"
+				<div class="img-box" @click="$goLink('/index', {'id': item.id, 'path': item.path})"
 				     :style="{'backgroundImage': 'url('+ item.cover +')'}">
 				</div>
 				<div class="book-name">{{ item.title }}</div>
-				<p class="delBtn" @click="delBook(index)">删除</p>
+				<p class="delBtn" @click="delBook(item.id)">删除</p>
 			</li>
 			<li class="item">
 				<el-upload
 						ref="upload-book"
 						class="book-uploader"
-						action="http://test.ct.duc.cn/api/cs/storage/file"
+						:action="uploadAction"
+						:upload="uploadHeaders"
 						:show-file-list="false"
+						:data="uploadData"
 						:on-change="bookHandleChange"
 						:on-success="bookHandleSuccess"
 						:on-error="handleError"

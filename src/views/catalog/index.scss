@@ -68,6 +68,28 @@
 						float: right;
 						color: #223FEE;
 						font-size: 14px;
+						i {
+							width: 8px;
+							height: 8px;
+							float: left;
+							margin: 6px;
+							border-radius: 8px;
+							&.default {
+								background: #3652F8;
+							}
+							&.green {
+								background: #1CB555;
+							}
+							&.orange {
+								background: #F19149;
+							}
+							&.blue {
+								background: #00A0E9;
+							}
+							&.violet {
+								background: #C490BF;
+							}
+						}
 						&:first-child {
 							float: left;
 						}
@@ -82,22 +104,23 @@
 					}
 					&.remarks {
 						position: relative;
+						padding-left: 10px;
 						margin-top: 16px;
-						margin-left: 40px;
+						margin-left: 30px;
 						color: #9D5E00;
 						line-height: 30px;
+						border-left: 1px solid rgba(90,93,109,0.5);
 					}
 
 				}
 				.bottom {
 					position: relative;
 					.tips {
-						padding: 0 12px 30px 0;
+						padding: 0 12px 0 0;
 						float: left;
 						color: #999999;
 						font-size: 18px;
 						line-height: 30px;
-						border-right: 1px solid rgba(90,93,109,0.5);
 					}
 				}
 			}

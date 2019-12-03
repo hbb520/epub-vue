@@ -1,67 +1,82 @@
-import { getList } from './service'
+import {getList, delBook} from './service';
 
+const ePub = window.ePub;
 export default {
   data() {
     return {
       bookList: [],
       bookFile: null,
+      uploadAction: 'http://120.25.249.22:8094/book/uploadBook.json',
+      uploadData: {
+        'fsize': 100000,
+      },
       uploadFileList: [],
     };
   },
-  components: {},
-  mounted() {
-
-  },
   created() {
-    this.getBookList()
+    this.getBookList();
   },
   methods: {
     getBookList() {
-      this.bookList = [
-        {
-          'id': 1,
-          'title': '图书1',
-          'cover': '../../../static/imgs/book.png'
-        },
-        {
-          'id': 2,
-          'title': '图书2',
-          'cover': '../../../static/imgs/book.png'
-        },
-        {
-          'id': 3,
-          'title': '图书3',
-          'cover': '../../../static/imgs/book.png'
-        },
-      ]
-      // getList().then( res => {
-      //   this.bookList = res.data.items
-      // }, error => {
-      //   this.$message.error(error)
-      // })
+      this.bookList = [];
+      getList().then(async res => {
+        if (res && res.data && Array.isArray(res.data)) {
+          for (let i = 0; i < res.data.length; i++) {
+            let book = ePub('http://120.25.249.22:8094/' + res.data[i].path);
+            let info;
+            if (book.isOpen) {
+              info = await book.loaded.metadata;
+            }
+            this.bookList.push({
+              id: res.data[i].id,
+              title: info ? info.title : res.data[i].name.split('.')[0],
+              path: res.data[i].path,
+              cover: book.cover,
+            });
+          }
+        }
+      }, error => {
+        this.$message.error(error);
+      });
     },
-    addBook(obj) {
-      this.bookList.push(obj)
-    },
-    delBook(index) {
-      this.bookList.splice(index, 1)
+    delBook(id) {
+      this.$confirm('此操作将删除该图书, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        const params = {
+          'bookId': id,
+        };
+        delBook(params).then(res => {
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          });
+          this.getBookList();
+        }, error => {
+          this.$message.error(error);
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除',
+        });
+      });
     },
     bookHandleChange(file, fileList) {
       this.uploadFileList = fileList.slice();
     },
     bookHandleSuccess(response, file) {
-      this.addBook({
-        id: response.data[0].id,
-        title: response.data[0].title,
-        cover: response.data[0].cover,
-      })
       this.$message({
         message: '图书上传成功',
         type: 'success',
       });
+      this.getBookList();
     },
     beforeBookUpload(file) {
       if (file && file.type === 'application/epub+zip') {
+        this.uploadData.cmfile = file
         return true;
       } else {
         this.$message.error('上传的图书必须为epub格式!');

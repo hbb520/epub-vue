@@ -40,8 +40,7 @@ export default {
       catalogStatus: false,
       currentChapter: null,
       bookmarksStatus: false,
-      bookWidth: 0,
-      bookHeight: 0,
+      bookFrame: null,
       singlePageStatus: false,
       themeStatus: false,
       theme: null,
@@ -54,7 +53,6 @@ export default {
       toolTipsLeft: 0,
       selectedInfo: {},
       selectedCfi: null,
-      selectedContents: null,
       selectedColorClassName: null,
       currentHandleWord: null,
       currentHandleAnnotateWrod: null,
@@ -63,8 +61,13 @@ export default {
       annotateTop: 0,
       annotateLeft: 0,
       annotateWord: null,
-      top: 0,
-      left: 0,
+      toolTipsList: [],
+      noteTipsList: [],
+      screenIsChange: false,
+      imgDialogStatus: false,
+      imgSrc: null,
+      messageStatus: false,
+      messageContent: null,
     };
   },
   components: {
@@ -74,9 +77,10 @@ export default {
     Search,
   },
   mounted() {
-    if (this.$route.query && this.$route.query.id) {
+    if (this.$route.query && this.$route.query.id && this.$route.query.path) {
       this.id = parseInt(this.$route.query.id);
-      this.getBookUrl(this.$route.query.id);
+      this.bookUrl = 'http://120.25.249.22:8094/' + this.$route.query.path
+      this.getBookUrl(this.bookUrl);
     }
   },
   created() {
@@ -84,19 +88,8 @@ export default {
   },
   methods: {
     // 获取图书路径
-    getBookUrl(id) {
-      const params = {
-        'id': id,
-      };
-      this.bookUrl = 'https://img1.yunser.com/epub/test.epub';
-      // this.bookUrl = 'https://s3.amazonaws.com/moby-dick/moby-dick.epub';
-      this.bookInit(this.bookUrl);
-      // getDetail(params).then(res => {
-      //   this.bookUrl = res.data.items.url;
-      //   this.bookInit(this.bookUrl);
-      // }, error => {
-      //   this.$message.error(error);
-      // });
+    getBookUrl(url) {
+      this.bookInit(url);
     },
     // 图书解析渲染
     bookInit(url) {
@@ -106,11 +99,12 @@ export default {
         width: '100%',
         height: '100%',
         spread: 'always',
+        // spreads: true,
+        // fixedLayout : true,
         ignoreClass: 'annotator-hl',
       });
       this.display = this.bookRendition.display();
-      this.bookWidth = document.getElementById('book').clientWidth;
-      this.bookHeight = document.getElementById('book').clientHeight;
+      this.bookFrame = document.getElementById('book').getBoundingClientRect();
       this.screenWidthChange();
       this.renderInit();
     },
@@ -157,173 +151,82 @@ export default {
         this.progress = location.start && location.start.percentage * 100;
         this.nextStatus = location.atEnd ? false : true;
         this.prevStatus = location.atStart ? false : true;
-        this.bookmarksStatus = false;
-        let startLocations = this.book.locations.locationFromCfi(
-            location.start.cfi);
-        let endLocations = this.book.locations.locationFromCfi(
-            location.end.cfi);
-
-        Promise.all(getBookmarks(this.id).map(item => {
-          return new Promise((resolve, reject) => {
-            this.chapterSearch(item.word, location.start.index, results => {
-              resolve(results);
-            });
-          });
-        })).then(results => {
-          this.bookmarksStatus = results.reduce((item1, item2) => {
-            return item1.concat(item2);
-          }, []).some(obj => {
-            let bookmarksLocations = this.book.locations.locationFromCfi(
-                obj.cfi);
-            return bookmarksLocations >= startLocations && bookmarksLocations <
-                endLocations;
-          });
-        });
-
-        let noteList = getNote(this.id);
-        for (let i = 0; i < noteList.length; i++) {
-          new Promise((resolve, reject) => {
-            this.chapterSearch(noteList[i].word, location.start.index,
-                results => {
-                  resolve(results);
-                });
-          }).then(results => {
-            let noteStatus = results.some(obj => {
-              let resultLocations = this.book.locations.locationFromCfi(
-                  obj.cfi);
-              return resultLocations >= startLocations && resultLocations <
-                  endLocations;
-            });
-            if (noteStatus) {
-              this.bookRendition.annotations.add('underline', noteList[i].cfi, {
-                cfiRange: noteList[i].cfi,
-                className: noteList[i].underlineClass,
-                annotation: noteList[i].annotation,
-              }, () => {}, 'default', {});
-            }
-          });
-        }
-
-        // Promise.all(getNote(this.id).map(item => {
-        //   return new Promise((resolve, reject) => {
-        //     this.chapterSearch(item.annotation, location.start.index, results => {
-        //       resolve(results);
-        //     });
-        //   });
-        // })).then(results => {
-        //   this.bookmarksStatus = results.reduce((item1, item2) => {
-        //     return item1.concat(item2);
-        //   }, []).some( obj => {
-        //     let resultLocations = this.book.locations.locationFromCfi(obj.cfi);
-        //     return resultLocations >= startLocations && resultLocations < endLocations
-        //   })
-        // });
-
+        this.bookmarksChange();
+        this.noteChange();
+        this.toolTipsStatus = false;
+        this.annotateStatus = false;
+        this.clearSelectInfo();
       });
       // 布局变化
       this.bookRendition.on('layout', function(layout) {
         console.log(44444444);
       });
-
-      // this.bookRendition.hooks.content.register(function(contents){
-      //   var loaded = Promise.all([
-      //     contents.addScript("https://code.jquery.com/jquery-2.1.4.min.js"),
-      //     contents.addStylesheet("http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.css")
-      //   ]);
-      //   return loaded;
-      // });
-
-      // let timer = null
-      let isSelected = false;
-      let that = this;
       // 选中文字
       this.bookRendition.on('selected', (cfiRange, contents) => {
+        let left = 0;
+        let top = 0;
         let range = contents.range(cfiRange);
-        // let otherRange = range.cloneRange()
-        // otherRange.collapse(false)
         let rangeObj = range.getBoundingClientRect();
-        // let otherRangeObj = otherRange.getBoundingClientRect();
-        // console.log(rangeObj)
-        // this.top = otherRangeObj.top + 186
-        // this.left = otherRangeObj.left + 178
         this.selectedCfi = cfiRange;
-        this.selectedContents = contents;
         this.selectedInfo = rangeObj;
+        if ((rangeObj.left - 0.04 * this.bookFrame.width) %
+            this.bookFrame.width < 6) {
+          left = 0.08 * this.bookFrame.width + 5;
+        }
         this.toolTipsTop = rangeObj.top + 55;
-        this.toolTipsLeft = rangeObj.left + 30 + rangeObj.width / 2;
+        // this.toolTipsTop = (rangeObj.top - top) % this.bookFrame.height + 55;
+        // this.toolTipsLeft = rangeObj.left + 30 + rangeObj.width / 2;
+        this.toolTipsLeft = (rangeObj.left - left) % this.bookFrame.width + 30 +
+            rangeObj.width / 2;
         this.toolTipsStatus = true;
         this.toolTipsMode = 'add';
-        this.book.getRange(cfiRange).then((range) => {
-          this.currentHandleWord = range.toString();
+        this.book.getRange(cfiRange).then(result => {
+          this.currentHandleWord = result.toString();
         });
       });
-      //   isSelected = true
-      //   console.log(this.bookRendition.annotations)
-      //   // clearTimeout(timer)
-      //   console.log(5555);
-      //   console.log(contents.window.querySelector('svg'));
-      //   contents.window.addEventListener('mouseup', e => {
-      //     if(!isSelected){
-      //       return true
-      //     }
 
-      // this.bookRendition.annotations.underline(cfiRange, {},
-      //     (val) => {
-      //       console.log(1234567)
-      //     }, 'annotation', {
-      //       'stroke': 'red',
-      //     });
-      // timer = setTimeout(() => {
-      //   console.log(9999)
-      //   that.bookRendition.annotations.add('underline', cfiRange, {},
-      //       (e) => {
-      //         console.log(101010)
-      //
-      //         console.log(e.target)
-      //         // console.log('highlight clicked', e.target);
-      //         console.log(e.target.querySelector('line').style)
-      //         e.target.querySelector('line').style.stroke = 'red'
-      //         e.target.querySelector('line').style.strokeOpacity = '1'
-      //         e.target.querySelector('rect').style.stroke = 'none'
-      //       }, 'hl',
-      //       {
-      //         'fill-opacity': '1', 'mix-blend-mode': 'multiply',
-      //         'line': {
-      //           'stroke': 'red',
-      //         },
-      //       });
-      //   isSelected = false
-      // });
-      // }, 100)
-
-      // this.bookRendition.themes.add('underline', contents)
-
+      // 鼠标松开
       this.bookRendition.on('mouseup', (event, contents) => {
-        this.toolTipsStatus = false;
-        this.annotateStatus = false;
+        if (this.toolTipsStatus || this.annotateStatus) {
+          this.toolTipsStatus = false;
+          this.annotateStatus = false;
+          this.clearSelectInfo();
+        }
+      });
+
+      // 点击事件
+      this.bookRendition.on('click', event => {
+        // 点击目标为图片
+        if (event.path[0].nodeName === 'IMG') {
+          this.imgDialogStatus = true;
+          this.imgSrc = event.path[0].src;
+        }
       });
 
       // 点击选中文字
       this.bookRendition.on('markClicked', (cfiRange, object, contents) => {
-        console.log(cfiRange);
-        console.log(object);
-        console.log(contents);
+        let left = 0;
+        let top = 0;
         let range = contents.range(cfiRange);
         let rangeObj = range.getBoundingClientRect();
         this.selectedCfi = cfiRange;
-        this.selectedContents = contents;
         this.selectedInfo = rangeObj;
         this.selectedColorClassName = object && object.className;
-        this.currentHandleAnnotateWrod = object.annotate
-            ? object.annotate
+        this.currentHandleAnnotateWrod = object.annotation
+            ? object.annotation
             : null;
+        if ((rangeObj.left - 0.04 * this.bookFrame.width) %
+            this.bookFrame.width < 6) {
+          left = 0.08 * this.bookFrame.width + 5;
+        }
         this.toolTipsTop = rangeObj.top + 55;
-        this.toolTipsLeft = rangeObj.left + 30 + rangeObj.width / 2;
+        // this.toolTipsTop = (rangeObj.top - top) % this.bookFrame.height + 185
+        // this.toolTipsLeft = rangeObj.left + 30 + rangeObj.width / 2;
+        this.toolTipsLeft = (rangeObj.left - left) % this.bookFrame.width + 30 +
+            rangeObj.width / 2;
         this.toolTipsStatus = true;
         this.toolTipsMode = 'edit';
-        this.book.getRange(cfiRange).then((range) => {
-          this.currentHandleWord = range.toString();
-        });
+        this.currentHandleWord = range.toString();
       });
     },
 
@@ -337,12 +240,14 @@ export default {
       oInput.style.display = 'none';
       document.body.removeChild(oInput);
       this.toolTipsStatus = false;
-      this.$message.info('复制成功！');
+      this.clearSelectInfo();
+      this.message('内容已成功复制到粘贴板')
     },
     // 分享
     share() {
       this.toolTipsStatus = false;
-      this.$message.info('分享成功！');
+      this.clearSelectInfo();
+      this.message('分享成功！')
     },
     // 划线
     createUnderline() {
@@ -362,6 +267,7 @@ export default {
         createTime: new Date().getTime(),
       });
       this.toolTipsStatus = false;
+      this.clearSelectInfo();
     },
     // 更换下划线颜色
     changeUnderlineColor(value) {
@@ -377,22 +283,34 @@ export default {
         bookId: this.id,
         cfi: this.selectedCfi,
         word: this.currentHandleWord,
-        type: 'underline',  // 'underline', 'annotation'
+        type: this.currentHandleAnnotateWrod ? 'annotation' : 'underline',  // 'underline', 'annotation'
         underlineClass: value,
         annotation: this.currentHandleAnnotateWrod,
         createTime: new Date().getTime(),
       });
+      this.noteTipsList.map(val => {
+        if (val.cfi === this.selectedCfi) {
+          val.underlineClass = value;
+        }
+        return val;
+      });
+      this.clearSelectInfo();
       this.toolTipsStatus = false;
     },
     // 清除划线
     clearUnderline() {
       this.bookRendition.annotations.remove(this.selectedCfi, 'underline');
       removeNote(this.id, this.selectedCfi);
+      this.noteTipsList = this.noteTipsList.filter(val => {
+        return !(val.cfi === this.selectedCfi);
+      });
+      this.clearSelectInfo();
       this.toolTipsStatus = false;
     },
     // 打开批注编辑框
     openAnnotateDialog() {
       this.toolTipsStatus = false;
+      let left = 0;
       let top = this.selectedInfo.top + 195 + this.selectedInfo.height;
       if ((top + 270) > document.body.clientHeight) {
         this.annotateShowAtTheBottom = false;
@@ -401,7 +319,12 @@ export default {
         this.annotateShowAtTheBottom = true;
         this.annotateTop = top;
       }
-      this.annotateLeft = this.selectedInfo.left + 180 +
+      if ((this.selectedInfo.left - 0.04 * this.bookFrame.width) %
+          this.bookFrame.width < 6) {
+        left = 0.08 * this.bookFrame.width + 5;
+      }
+      this.annotateLeft = (this.selectedInfo.left - left) %
+          this.bookFrame.width + this.bookFrame.left +
           this.selectedInfo.width / 2 - 250;
       this.annotateStatus = true;
       this.annotateWord = this.currentHandleAnnotateWrod;
@@ -415,7 +338,9 @@ export default {
       removeNote(this.id, this.selectedCfi);
       this.bookRendition.annotations.add('underline', this.selectedCfi, {
         cfiRange: this.selectedCfi,
-        className: 'default',
+        className: this.selectedColorClassName
+            ? this.selectedColorClassName
+            : 'default',
         annotation: this.annotateWord,
       }, () => {}, 'default', {});
       setNote(this.id, {
@@ -423,13 +348,131 @@ export default {
         bookId: this.id,
         cfi: this.selectedCfi,
         word: this.currentHandleWord,
-        type: 'underline',  // 'underline', 'annotation'
-        underlineClass: 'default',
+        type: 'annotation',  // 'underline', 'annotation'
+        underlineClass: this.selectedColorClassName
+            ? this.selectedColorClassName
+            : 'default',
         annotation: this.annotateWord,
         createTime: new Date().getTime(),
       });
+      let isExistence = this.noteTipsList.some(val => {
+        return val.cfi === this.selectedCfi;
+      });
+      if (isExistence) {
+        this.noteTipsList.map(item => {
+          if (item.cfi === this.selectedCfi) {
+            item.annotation = this.annotateWord;
+          }
+          return item;
+        });
+      } else {
+        this.noteTipsList.push({
+          id: this.id + new Date().getTime(),
+          bookId: this.id,
+          cfi: this.selectedCfi,
+          word: this.currentHandleWord,
+          type: 'annotation',  // 'underline', 'annotation'
+          underlineClass: 'default',
+          annotation: this.annotateWord,
+          createTime: new Date().getTime(),
+          isShowed: false,
+          ...this.getNoteTipsPosition(this.selectedCfi),
+        });
+      }
       this.annotateStatus = false;
+      this.clearSelectInfo();
+    },
+    // 获取批注标记坐标
+    getNoteTipsPosition(cfi) {
+      let left = 0;
+      let top = 0;
+      let otherRange = this.bookRendition.getRange(cfi).cloneRange();
+      otherRange.collapse(false);
+      let otherRangeObj = otherRange.getBoundingClientRect();
+      if ((otherRangeObj.left - 0.04 * this.bookFrame.width) %
+          this.bookFrame.width < 6) {
+        left = 0.08 * this.bookFrame.width + 5;
+      }
+      return {
+        top: otherRangeObj.top + otherRangeObj.height + this.bookFrame.top + 9 -
+            (this.screenIsChange ? 20 : 0),
+        left: (otherRangeObj.left - left) % this.bookFrame.width +
+            this.bookFrame.left,
+      };
+    },
+    // 清理选中信息
+    clearSelectInfo() {
+      this.toolTipsMode = 'add';
+      this.selectedCfi = null;
+      this.selectedColorClassName = null;
       this.currentHandleWord = null;
+      this.currentHandleAnnotateWrod = null;
+      this.annotateWord = null;
+    },
+    // 书签变更
+    bookmarksChange() {
+      this.bookmarksStatus = false;
+      let startLocations = this.book.locations.locationFromCfi(
+          this.locations.start.cfi);
+      let endLocations = this.book.locations.locationFromCfi(
+          this.locations.end.cfi);
+      Promise.all(getBookmarks(this.id).map(item => {
+        return new Promise((resolve, reject) => {
+          this.chapterSearch(item.word, this.locations.start.index, results => {
+            resolve(results);
+          });
+        });
+      })).then(results => {
+        this.bookmarksStatus = results.reduce((item1, item2) => {
+          return item1.concat(item2);
+        }, []).some(obj => {
+          let bookmarksLocations = this.book.locations.locationFromCfi(
+              obj.cfi);
+          return bookmarksLocations >= startLocations && bookmarksLocations <
+              endLocations;
+        });
+      });
+    },
+    // 笔记变更
+    noteChange(cfi) {
+      let noteList = getNote(this.id);
+      this.bookRendition.annotations.remove(cfi, 'underline');
+      let startLocations = this.book.locations.locationFromCfi(
+          this.locations.start.cfi);
+      let endLocations = this.book.locations.locationFromCfi(
+          this.locations.end.cfi);
+      this.toolTipsList = [];
+      this.noteTipsList = [];
+      for (let i = 0; i < noteList.length; i++) {
+        new Promise((resolve, reject) => {
+          this.chapterSearch(noteList[i].word, this.locations.start.index,
+              results => {
+                resolve(results);
+              });
+        }).then(results => {
+          let noteStatus = results.some(obj => {
+            let resultLocations = this.book.locations.locationFromCfi(
+                obj.cfi);
+            return resultLocations >= startLocations && resultLocations <
+                endLocations;
+          });
+          if (noteStatus) {
+            this.toolTipsList.push(noteList[i].cfi);
+            this.bookRendition.annotations.add('underline', noteList[i].cfi, {
+              cfiRange: noteList[i].cfi,
+              className: noteList[i].underlineClass,
+              annotation: noteList[i].annotation,
+            }, () => {}, noteList[i].underlineClass, {});
+            if (noteList[i].type === 'annotation') {
+              this.noteTipsList.push({
+                isShowed: false,
+                ...this.getNoteTipsPosition(noteList[i].cfi),
+                ...noteList[i],
+              });
+            }
+          }
+        });
+      }
     },
     // 获取图书信息
     getBookInfo() {
@@ -641,24 +684,34 @@ export default {
     setPageType() {
       let width = document.body.clientWidth;
       if (width > 1133) {
-        if (this.singlePageStatus) {
-          this.bookRendition.resize(this.bookWidth);
-        } else {
-          this.bookRendition.resize(640);
-        }
+        this.screenIsChange = true;
         this.singlePageStatus = !this.singlePageStatus;
+        setTimeout(() => {
+          this.bookFrame = document.getElementById('book').
+              getBoundingClientRect();
+          if ( !this.singlePageStatus) {
+            this.bookRendition.resize(this.bookFrame.width);
+          } else {
+            this.bookRendition.resize(640);
+          }
+          this.toolTipsStatus = false;
+          this.annotateStatus = false;
+        }, 100);
       }
     },
     // 监听屏幕大小变化
     screenWidthChange() {
       window.onresize = () => {
-        this.bookWidth = document.getElementById('book').clientWidth;
-        this.bookRendition.resize(this.bookWidth);
-        this.toolTipsStatus = false;
-        this.annotateStatus = false;
-        this.singlePageStatus = this.bookWidth < 800
+        this.screenIsChange = true;
+        this.singlePageStatus = this.bookFrame.width < 800
             ? false
             : this.singlePageStatus;
+        setTimeout(() => {
+          this.bookFrame = document.getElementById('book').getBoundingClientRect();
+          this.bookRendition.resize(this.bookFrame.width);
+          this.toolTipsStatus = false;
+          this.annotateStatus = false;
+        }, 100)
       };
     },
     // 全屏
@@ -697,6 +750,15 @@ export default {
         this.drawer_open = false;
       }
     },
+    // 消息
+    message(content) {
+      this.messageStatus = true
+      this.messageContent = content
+      setTimeout(() => {
+        this.messageStatus = false
+        this.messageContent = null
+      }, 3000)
+    }
   },
 };
 

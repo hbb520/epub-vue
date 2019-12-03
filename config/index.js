@@ -9,11 +9,20 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      '/book': {
+        // 测试环境
+        target: 'http://120.25.249.22:8094',  // 接口域名
+        changeOrigin: true,  //是否跨域
+        pathRewrite: {// 如果接口本身没有/api需要通过pathRewrite来重写了地址
+          '^book': '/book'
+        }
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
-    port: 9528, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    port: 9529, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: false,

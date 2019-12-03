@@ -1,6 +1,8 @@
 import {
   getBookmarks,
   removeBookmarks,
+  getNote,
+  removeNote,
 } from '../../utils/auth';
 
 export default {
@@ -28,11 +30,13 @@ export default {
   data() {
     return {
       menu: 1,
-      bookmarksList: []
+      bookmarksList: [],
+      noteList: []
     };
   },
   created() {
     this.getBookmarksList();
+    this.getNoteList();
   },
   methods: {
     toggleMenu(value) {
@@ -53,11 +57,32 @@ export default {
     delBookmarks(id) {
       removeBookmarks(this.id, id)
       this.getBookmarksList()
+      this.$emit('closeDialog', () => {
+        this.$emit('bookmarksChange')
+      }, true);
     },
     // 书签跳转
     getoBookmarks(cfi){
       this.$emit('closeDialog', () => {
         this.$emit('gotoBookmarks', cfi)
+      }, true);
+    },
+    //  获取笔记
+    getNoteList() {
+      this.noteList = getNote(this.id)
+    },
+    //  删除笔记
+    delNote(cfi) {
+      removeNote(this.id, cfi)
+      this.getNoteList()
+      this.$emit('closeDialog', () => {
+        this.$emit('noteChange', cfi)
+      }, true);
+    },
+    // 笔记跳转
+    getoNote(cfi){
+      this.$emit('closeDialog', () => {
+        this.$emit('gotoNote', cfi)
       }, true);
     },
     parseTime(time) {
