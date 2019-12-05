@@ -11,20 +11,28 @@
 		</mu-appbar>
 		<ul class="book-list-ul clearfix">
 			<li class="item" v-for="(item, index) in bookList" :key="index">
-				<div class="img-box" @click="$goLink('/index', {'id': item.id, 'path': item.path})"
-				     :style="{'backgroundImage': 'url('+ item.cover +')'}">
+				<div class="img-box" @click="$goLink('/index', {'id': item.id, 'path': item.path})">
+					<div class="img" :style="{'backgroundImage': 'url('+ item.cover +')'}"></div>
 				</div>
 				<div class="book-name">{{ item.title }}</div>
 				<p class="delBtn" @click="delBook(item.id)">删除</p>
 			</li>
-			<li class="item">
+			<li class="item" v-if="isUploading">
+				<div class="img-box">
+					<el-progress type="circle" :percentage="progress"
+					             style="margin-top: 50px"></el-progress>
+				</div>
+				<div class="book-name">{{ uploadFileList[0].name }}</div>
+				<p class="delBtn" @click="delUploadingBook()">删除</p>
+			</li>
+			<li class="item" v-show="!isUploading">
 				<el-upload
-						ref="upload-book"
+						ref="uploadBook"
 						class="book-uploader"
 						:action="uploadAction"
-						:upload="uploadHeaders"
 						:show-file-list="false"
 						:data="uploadData"
+						:on-progress="uploading"
 						:on-change="bookHandleChange"
 						:on-success="bookHandleSuccess"
 						:on-error="handleError"

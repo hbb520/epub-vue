@@ -152,6 +152,16 @@
 					width: 100%;
 					height: calc(100% - 80px);
 				}
+
+				.middleLine {
+					height: calc(100% - 120px);
+					position: absolute;
+					top: 60px;
+					left: 0;
+					right: 0;
+					bottom: 60px;
+					margin: auto;
+				}
 			}
 		}
 	}
@@ -456,5 +466,13 @@
 			line-height: 20px;
 			text-align: center;
 		}
+	}
+	.test {
+		display: block;
+		width: 10px;
+		height: 10px;
+		position: fixed;
+		z-index: 9999999;
+		background: red;
 	}
 }

@@ -20,13 +20,18 @@
 			margin-left: 62px;
 			margin-bottom: 45px;
 
-			.img-box {
+			.img-box{
 				width: 200px;
 				height: 280px;
 				position: relative;
 				margin-bottom: 16px;
-				background-size: cover;
-				background-image: url("../../../static/imgs/book.png");
+				text-align: center;
+				background: #FFFFFF;
+				.img {
+					width: 200px;
+					height: 280px;
+					background-size: cover;
+				}
 			}
 
 			.book-name {

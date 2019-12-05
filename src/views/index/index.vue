@@ -60,6 +60,8 @@
 						<span v-if="bookInfo.currentPage && bookInfo.totalPage">
 							{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
 					</div>
+					<img v-if="!singlePageStatus" class="middleLine"
+					     src="../../assets/imgs/middleLine.png" alt="">
 				</div>
 				<div class="next" @click="next" v-if="nextStatus">
 					<i class="iconfont iconright"></i>
@@ -71,7 +73,8 @@
 		                 @change="onProgressChange"></progress-slider>
 		<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container"
 		           @close="dialogHandle">
-			<catalog v-if="catalogStatus" :id="id" :chapterList="book.navigation.toc" :currentChapter="currentChapter"
+			<catalog v-if="catalogStatus" :id="id" :chapterList="chapterDetailList"
+			         :currentChapter="currentChapter"
 			         @closeDialog="dialogHandle" @goToChapter="goToChapter"
 			         @gotoBookmarks="gotoBookmarks" @gotoNote="gotoBookmarks"
 			         @bookmarksChange="bookmarksChange" @noteChange="noteChange"></catalog>
@@ -125,6 +128,7 @@
 		<div id="message" v-if="messageStatus">
 			<p class="wordOverflow">{{ messageContent }}</p>
 		</div>
+		<p class="test" :style="{'top': top + 'px','left': left + 'px'}"></p>
 	</div>
 </template>
 

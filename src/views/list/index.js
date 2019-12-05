@@ -11,6 +11,8 @@ export default {
         'fsize': 100000,
       },
       uploadFileList: [],
+      progress: 0,
+      isUploading: false,
     };
   },
   created() {
@@ -64,10 +66,15 @@ export default {
         });
       });
     },
+    uploading(event, file, fileList) {
+      this.isUploading = true
+      this.progress = parseInt(file.percentage)
+    },
     bookHandleChange(file, fileList) {
       this.uploadFileList = fileList.slice();
     },
     bookHandleSuccess(response, file) {
+      this.isUploading = false
       this.$message({
         message: '图书上传成功',
         type: 'success',
@@ -84,8 +91,13 @@ export default {
       }
     },
     handleError() {
+      this.isUploading = false
       this.$message.error('上传出错');
     },
+    delUploadingBook() {
+      this.isUploading = false
+      this.$refs.uploadBook.abort()
+    }
   },
 };
 
