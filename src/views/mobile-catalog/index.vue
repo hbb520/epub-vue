@@ -1,5 +1,5 @@
 <template>
-	<div id="catalog">
+	<div id="mobileCatalog">
 		<mu-bottom-nav :value.sync="menu" @change="toggleMenu">
 			<mu-bottom-nav-item :value="0" icon="close"></mu-bottom-nav-item>
 			<mu-bottom-nav-item :value="1" title="目录"></mu-bottom-nav-item>
@@ -63,12 +63,12 @@
 	@import './index.scss';
 </style>
 <style rel="stylesheet/scss" lang="scss">
-	#catalog {
+	#mobileCatalog {
 		.mu-bottom-nav{
 			color: #ffffff;
 			background-color: #223FEE;
 			.mu-bottom-item {
-				flex: 3;
+				flex: 2;
 				&:first-child {
 					flex: 1;
 				}
@@ -78,7 +78,7 @@
 						.mu-bottom-item-text {
 							position: relative;
 							color: #ffffff;
-							font-size: 24px;
+							font-size: 18px;
 							opacity: 1;
 							&:before {
 								content: '';
@@ -101,12 +101,12 @@
 						width: 30px;
 						margin: 7px auto;
 						color: #ffffff;
-						font-size: 30px;
+						font-size: 24px;
 						line-height: 30px;
 					}
 					.mu-bottom-item-text {
 						color: #ffffff;
-						font-size: 20px;
+						font-size: 14px;
 						opacity: 0.6;
 					}
 				}
@@ -114,27 +114,6 @@
 		}
 		.catalog-container, .bookmark-container, .note-container {
 			height: calc(100vh - 56px);
-		}
-		@media (min-width: 600px) {
-			.mu-bottom-nav{
-				height: 64px;
-				.mu-bottom-item {
-					.mu-bottom-item-wrapper {
-						line-height: 52px;
-						.mu-icon {
-							margin: 11px auto;
-						}
-					}
-					&.mu-bottom-item-active {
-						.mu-bottom-item-wrapper {
-							line-height: 48px;
-						}
-					}
-				}
-			}
-			.catalog-container, .bookmark-container, .note-container {
-				height: calc(100vh - 64px);
-			}
 		}
 	}
 </style>

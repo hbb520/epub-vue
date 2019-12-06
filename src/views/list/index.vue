@@ -11,7 +11,7 @@
 		</mu-appbar>
 		<ul class="book-list-ul clearfix">
 			<li class="item" v-for="(item, index) in bookList" :key="index">
-				<div class="img-box" @click="$goLink('/index', {'id': item.id, 'path': item.path})">
+				<div class="img-box" @click="$goLink(isPhoneClient ? '/mobileIndex' : '/index', {'id': item.id, 'path': item.path})">
 					<div class="img" :style="{'backgroundImage': 'url('+ item.cover +')'}"></div>
 				</div>
 				<div class="book-name">{{ item.title }}</div>

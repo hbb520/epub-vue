@@ -1,0 +1,153 @@
+@import "src/styles/index.scss";
+
+#mobileCatalog {
+	height: 100%;
+	overflow: hidden;
+
+	.catalog-container, .bookmark-container, .note-container {
+		width: calc(100% + 17px);
+		position: relative;
+		overflow-x: hidden;
+		overflow-y: auto;
+		background-color: #FBFBFB;
+
+		.list {
+			width: 100%;
+			padding: 0 40px 0 10px;
+
+			.chapter {
+				padding: 10px 6px 10px 10px;
+				color: #999999;
+				line-height: 20px;
+				border-bottom: 1px solid rgba(90, 93, 109, 0.1);
+
+				p {
+					width: calc(100% - 35px);
+					float: left;
+					font-size: 14px;
+					cursor: pointer;
+				}
+
+				span {
+					width: 35px;
+					float: left;
+					font-size: 12px;
+					text-align: right;
+				}
+				&.active {
+					color: #223FEE;
+				}
+				&.unit {
+					p {
+						width: calc(100% - 85px);
+						margin-left: 50px;
+					}
+				}
+			}
+			.bookmark, .note {
+				padding: 10px 16px 10px 20px;
+				color: #999999;
+				line-height: 20px;
+				border-bottom: 1px solid rgba(90, 93, 109, 0.1);
+				&:first-child {
+					margin-top: 38px;
+				}
+				p {
+					color: #333333;
+					font-size: 14px;
+					line-height: 20px;
+					&.content {
+						line-height: 20px;
+						cursor: pointer;
+					}
+					&:first-child {
+						margin-bottom: 8px;
+					}
+					span {
+						float: right;
+						color: #223FEE;
+						font-size: 12px;
+						i {
+							width: 8px;
+							height: 8px;
+							float: left;
+							margin: 6px;
+							border-radius: 8px;
+							&.default {
+								background: #3652F8;
+							}
+							&.green {
+								background: #1CB555;
+							}
+							&.orange {
+								background: #F19149;
+							}
+							&.blue {
+								background: #00A0E9;
+							}
+							&.violet {
+								background: #C490BF;
+							}
+						}
+						&:first-child {
+							float: left;
+						}
+					}
+					i {
+						float: right;
+						cursor: pointer;
+						margin-left: 16px;
+						&:hover {
+							color: #FF5555;
+						}
+					}
+					&.remarks {
+						position: relative;
+						padding-left: 10px;
+						margin-top: 6px;
+						margin-left: 20px;
+						color: #9D5E00;
+						line-height: 20px;
+						border-left: 1px solid rgba(90,93,109,0.5);
+					}
+
+				}
+				.bottom {
+					position: relative;
+					.tips {
+						padding: 0 10px 0 0;
+						float: left;
+						color: #999999;
+						font-size: 14px;
+						line-height: 20px;
+					}
+				}
+			}
+		}
+		.noBookmark, .noNote {
+			width: 100%;
+			height: 100px;
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			margin: auto;
+			color: #BBBBBB;
+			p {
+				margin-bottom: 10px;
+				font-size: 20px;
+				text-align: center;
+				line-height: 30px;
+				&:last-child {
+					font-size: 14px;
+					line-height: 20px;
+				}
+				i {
+					margin: 0 5px;
+					font-size: 20px;
+				}
+			}
+		}
+	}
+}

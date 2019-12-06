@@ -1,7 +1,7 @@
 import ProgressSlider from '../../components/slider/slider.vue';
-import Catalog from '../catalog/index.vue';
-import Theme from '../theme/index.vue';
-import Search from '../search/index.vue';
+import MobileCatalog from '../mobile-catalog/index.vue';
+import MobileTheme from '../mobile-theme/index.vue';
+import MobileSearch from '../mobile-search/index.vue';
 import {
   getLS,
   setLS,
@@ -69,15 +69,16 @@ export default {
       messageStatus: false,
       messageContent: null,
       surplusTop: 0,
+      menuDialogStatus: false,
       top: 0,
       left: 0,
     };
   },
   components: {
     ProgressSlider,
-    Catalog,
-    Theme,
-    Search,
+    MobileCatalog,
+    MobileTheme,
+    MobileSearch,
   },
   mounted() {
     if (this.$route.query && this.$route.query.id && this.$route.query.path) {
@@ -224,15 +225,31 @@ export default {
         // 点击事件
         this.bookRendition.on('click', event => {
           // 点击目标为图片
+
           if (this.toolTipsStatus || this.annotateStatus) {
             this.toolTipsStatus = false;
             this.annotateStatus = false;
             this.clearSelectInfo();
           }
+
           if (event.path[0].nodeName === 'IMG') {
             this.imgDialogStatus = true;
             this.imgSrc = event.path[0].src;
+          } else if (event.pageX % this.bookFrame.width < 0.3 *
+              this.bookFrame.width) {
+            this.menuDialogStatus = false
+            this.prevStatus && this.prev();
+          } else if ((event.pageX % this.bookFrame.width >= 0.3 *
+              this.bookFrame.width) &&
+              (event.pageX % this.bookFrame.width <= 0.7 *
+                  this.bookFrame.width)) {
+            this.menuDialogStatus = !this.menuDialogStatus;
+          } else if (event.pageX % this.bookFrame.width > 0.7 *
+              this.bookFrame.width) {
+            this.menuDialogStatus = false
+            this.nextStatus && this.next();
           }
+
         });
 
         // 点击选中文字
@@ -431,8 +448,8 @@ export default {
           fs = parseInt(getLS('fontSize')),
           lh = parseInt(getLS('lineHeight') * 10) / 10;
       range = this.bookRendition.getRange(cfi);
-      if(!range){
-        return true
+      if ( !range) {
+        return true;
       }
       otherRange = range.cloneRange();
       otherRange.collapse(false);
@@ -448,14 +465,19 @@ export default {
         if (otherRangeObj.top <= (3 * lh / 0.4 + fs - 6)) {
           if (Math.abs(otherRangeObj.left % this.bookFrame.width - 0.04 *
               this.bookFrame.width) < 10) {
-            top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 - this.surplusTop;;
+            top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
+                this.surplusTop;
+            ;
             left = left + 0.92 * this.bookFrame.width - 5;
           } else {
-            top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 - this.surplusTop;;
+            top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
+                this.surplusTop;
+            ;
             left = left - 0.08 * this.bookFrame.width - 3;
           }
         } else {
-          top = top - fs * lh - this.surplusTop;;
+          top = top - fs * lh - this.surplusTop;
+          ;
           left = left + 0.42 * this.bookFrame.width - 3;
         }
       }
@@ -482,12 +504,13 @@ export default {
           this.locations.start.cfi);
       let endLocations = this.book.locations.locationFromCfi(
           this.locations.end.cfi);
-      this.bookmarksStatus = getBookmarks(this.id).some( val => {
+      this.bookmarksStatus = getBookmarks(this.id).some(val => {
         let resultLocations = this.book.locations.locationFromCfi(
             val.startCfi);
         return resultLocations >= startLocations && resultLocations <
-            endLocations && resultLocations < ((endLocations + startLocations) / 2);
-      })
+            endLocations && resultLocations <
+            ((endLocations + startLocations) / 2);
+      });
     },
     // 笔记变更
     noteChange(cfi) {
@@ -507,7 +530,8 @@ export default {
           let resultLocations = this.book.locations.locationFromCfi(
               val.cfi);
           return resultLocations >= startLocations && resultLocations <
-              endLocations && resultLocations > ((endLocations + startLocations) / 2);
+              endLocations && resultLocations >
+              ((endLocations + startLocations) / 2);
         });
         if (noteStatus) {
           this.toolTipsList.push(item.cfi);
@@ -645,6 +669,18 @@ export default {
         this.bookRendition.next();
       }
     },
+    progressPrev() {
+      if (this.progress > 1) {
+        this.progress--;
+        this.onProgressChange(this.progress);
+      }
+    },
+    progressNext() {
+      if (this.progress < 99) {
+        this.progress++;
+        this.onProgressChange(this.progress);
+      }
+    },
     // 打开目录
     menu_click() {
       this.drawer_open = true;
@@ -731,7 +767,8 @@ export default {
         this.singlePageStatus = !this.singlePageStatus;
         this.surplusTop = 21;
         setTimeout(() => {
-          this.bookFrame = document.getElementById('book').getBoundingClientRect();
+          this.bookFrame = document.getElementById('book').
+              getBoundingClientRect();
           if ( !this.singlePageStatus) {
             this.bookRendition.resize(this.bookFrame.width);
           } else {
@@ -794,6 +831,7 @@ export default {
       }
       if (isClose) {
         this.drawer_open = false;
+        this.menuDialogStatus = false
       }
     },
     // 消息

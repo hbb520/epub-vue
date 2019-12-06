@@ -128,7 +128,6 @@
 		<div id="message" v-if="messageStatus">
 			<p class="wordOverflow">{{ messageContent }}</p>
 		</div>
-		<p class="test" :style="{'top': top + 'px','left': left + 'px'}"></p>
 	</div>
 </template>
 

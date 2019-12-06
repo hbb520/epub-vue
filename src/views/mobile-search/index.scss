@@ -1,0 +1,52 @@
+@import "src/styles/index.scss";
+
+#mobileSearch {
+	height: 100%;
+	overflow: hidden;
+
+
+	.search-container {
+		width: calc(100% + 17px);
+		position: relative;
+		overflow-x: hidden;
+		overflow-y: auto;
+		background-color: #FBFBFB;
+
+		.box {
+			width: 100%;
+			padding: 27px 50px 0 20px;
+		}
+
+		.list {
+			width: 100%;
+			padding: 0 40px 0 10px;
+
+			.result {
+				padding: 6px 18px 6px 14px;
+				border-bottom: 1px solid rgba(90, 93, 109, 0.1);
+				&:first-child {
+					border-top: 1px solid rgba(90, 93, 109, 0.1);
+				}
+				p {
+					color: #333333;
+					font-size: 14px;
+					line-height: 20px;
+					cursor: pointer;
+				}
+			}
+		}
+		.noContent, .noResult {
+			width: 100%;
+			height: 40px;
+			position: absolute;
+			top: 30%;
+			left: 0;
+			color: #666666;
+			p {
+				font-size: 16px;
+				text-align: center;
+				line-height: 40px;
+			}
+		}
+	}
+}

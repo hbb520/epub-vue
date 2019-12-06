@@ -38,6 +38,14 @@ export const constantRouterMap = [
     },
   },
   {
+    path: '/mobileIndex',
+    name: 'mobileIndex',
+    component: _import('mobile/index'),
+    meta: {
+      title: ['书籍'],
+    },
+  },
+  {
     path: '/list',
     name: 'List',
     component: _import('list/index'),
