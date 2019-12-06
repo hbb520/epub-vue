@@ -18,7 +18,7 @@ export default {
   },
   created() {
     this.getBookList();
-    this.judgeClient()
+    this.judgeClient();
   },
   methods: {
     getBookList() {
@@ -27,15 +27,17 @@ export default {
         if (res && res.data && Array.isArray(res.data)) {
           for (let i = 0; i < res.data.length; i++) {
             let book = ePub('http://120.25.249.22:8094/' + res.data[i].path);
-            let info;
-            if (book.isOpen) {
-              info = await book.loaded.metadata;
-            }
-            this.bookList.push({
-              id: res.data[i].id,
-              title: info ? info.title : res.data[i].name.split('.')[0],
-              path: res.data[i].path,
-              cover: book.cover,
+            let bookRendition = book.renderTo('book', {
+              width: '100%',
+              height: '100%',
+            });
+            book.ready.then((arr) => {
+              this.bookList.push({
+                id: res.data[i].id,
+                title: arr[2].title,
+                path: res.data[i].path,
+                cover: this.getImgUrl('blob:http://120.25.249.22:8094/' + book.loading.cover.id),
+              });
             });
           }
         }
@@ -69,14 +71,14 @@ export default {
       });
     },
     uploading(event, file, fileList) {
-      this.isUploading = true
-      this.progress = parseInt(file.percentage)
+      this.isUploading = true;
+      this.progress = parseInt(file.percentage);
     },
     bookHandleChange(file, fileList) {
       this.uploadFileList = fileList.slice();
     },
     bookHandleSuccess(response, file) {
-      this.isUploading = false
+      this.isUploading = false;
       this.$message({
         message: '图书上传成功',
         type: 'success',
@@ -85,7 +87,7 @@ export default {
     },
     beforeBookUpload(file) {
       if (file && file.type === 'application/epub+zip') {
-        this.uploadData.cmfile = file
+        this.uploadData.cmfile = file;
         return true;
       } else {
         this.$message.error('上传的图书必须为epub格式!');
@@ -93,29 +95,44 @@ export default {
       }
     },
     handleError() {
-      this.isUploading = false
+      this.isUploading = false;
       this.$message.error('上传出错');
     },
     delUploadingBook() {
-      this.isUploading = false
-      this.$refs.uploadBook.abort()
+      this.isUploading = false;
+      this.$refs.uploadBook.abort();
     },
     judgeClient() {
       let sUserAgent = navigator.userAgent.toLowerCase();
-      let bIsIpad = sUserAgent.match(/ipad/i) == "ipad";
-      let bIsIphoneOs = sUserAgent.match(/iphone os/i) == "iphone os";
-      let bIsMidp = sUserAgent.match(/midp/i) == "midp";
-      let bIsUc7 = sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4";
-      let bIsUc = sUserAgent.match(/ucweb/i) == "ucweb";
-      let bIsAndroid = sUserAgent.match(/android/i) == "android";
-      let bIsCE = sUserAgent.match(/windows ce/i) == "windows ce";
-      let bIsWM = sUserAgent.match(/windows mobile/i) == "windows mobile";
-      if (!(bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM) ){
-        this.isPhoneClient = false
-      }else{
-        this.isPhoneClient = true
+      let bIsIpad = sUserAgent.match(/ipad/i) == 'ipad';
+      let bIsIphoneOs = sUserAgent.match(/iphone os/i) == 'iphone os';
+      let bIsMidp = sUserAgent.match(/midp/i) == 'midp';
+      let bIsUc7 = sUserAgent.match(/rv:1.2.3.4/i) == 'rv:1.2.3.4';
+      let bIsUc = sUserAgent.match(/ucweb/i) == 'ucweb';
+      let bIsAndroid = sUserAgent.match(/android/i) == 'android';
+      let bIsCE = sUserAgent.match(/windows ce/i) == 'windows ce';
+      let bIsWM = sUserAgent.match(/windows mobile/i) == 'windows mobile';
+      if ( !(bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc ||
+          bIsAndroid || bIsCE || bIsWM)) {
+        this.isPhoneClient = false;
+      } else {
+        this.isPhoneClient = true;
       }
-    }
+    },
+    getImgUrl(url) {
+      let xhr = new XMLHttpRequest();
+      xhr.responseType = 'blob';
+      xhr.onload = function () {
+        let recoveredBlob = xhr.response;
+        let reader = new FileReader();
+        reader.onload = function () {
+          console.log(reader.result)
+        };
+        reader.readAsDataURL(recoveredBlob);
+      };
+      xhr.open('GET', url);
+      xhr.send();
+    },
   },
 };
 

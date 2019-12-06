@@ -44,6 +44,7 @@
 				</el-upload>
 			</li>
 		</ul>
+		<div id="book"></div>
 	</div>
 </template>
 
