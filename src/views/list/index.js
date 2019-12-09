@@ -6,7 +6,7 @@ export default {
     return {
       bookList: [],
       bookFile: null,
-      uploadAction: 'http://120.25.249.22:8094/book/uploadBook.json',
+      uploadAction: 'http://huake.qanzone.com:8094/book/uploadBook.json',
       uploadData: {
         'fsize': 100000,
       },
@@ -26,18 +26,16 @@ export default {
       getList().then(async res => {
         if (res && res.data && Array.isArray(res.data)) {
           for (let i = 0; i < res.data.length; i++) {
-            let book = ePub('http://120.25.249.22:8094/' + res.data[i].path);
-            let bookRendition = book.renderTo('book', {
-              width: '100%',
-              height: '100%',
-            });
+            let book = ePub('http://huake.qanzone.com:8094/' + res.data[i].path)
             book.ready.then((arr) => {
-              this.bookList.push({
-                id: res.data[i].id,
-                title: arr[2].title,
-                path: res.data[i].path,
-                cover: this.getImgUrl('blob:http://120.25.249.22:8094/' + book.loading.cover.id),
-              });
+             book.archive.getBase64(book.cover).then(url => {
+               this.bookList.push({
+                 id: res.data[i].id,
+                 title: arr[2].title,
+                 path: res.data[i].path,
+                 cover: url,
+               });
+             })
             });
           }
         }
@@ -118,21 +116,7 @@ export default {
       } else {
         this.isPhoneClient = true;
       }
-    },
-    getImgUrl(url) {
-      let xhr = new XMLHttpRequest();
-      xhr.responseType = 'blob';
-      xhr.onload = function () {
-        let recoveredBlob = xhr.response;
-        let reader = new FileReader();
-        reader.onload = function () {
-          console.log(reader.result)
-        };
-        reader.readAsDataURL(recoveredBlob);
-      };
-      xhr.open('GET', url);
-      xhr.send();
-    },
+    }
   },
 };
 

@@ -21,7 +21,7 @@
 					<p class="clearfix">
 						<span>{{ parseTime(item.createTime) }}</span>
 						<i class="iconfont icondelete" @click="delBookmarks(item.id)"></i>
-						<span>55</span>
+						<span>{{ item.index }}</span>
 					</p>
 					<p class="content wordOverflow2" @click="getoBookmarks(item.startCfi)">{{ item.word }}</p>
 				</div>
@@ -37,7 +37,7 @@
 					<p class="clearfix">
 						<span><i :class="item.underlineClass"></i>{{ parseTime(item.createTime) }}</span>
 						<i class="iconfont icondelete" @click="delNote(item.cfi)"></i>
-						<span>55</span>
+						<span>{{ item.index }}</span>
 					</p>
 					<p class="content wordOverflow2" @click="getoNote(item.cfi)">{{ item.word }}</p>
 					<div class="bottom clearfix" v-if="item.type === 'annotation'">
@@ -71,6 +71,14 @@
 				flex: 2;
 				&:first-child {
 					flex: 1;
+					i {
+						display: none;
+					}
+					.mu-bottom-item-wrapper {
+						background: url("../../assets/imgs/close.png") no-repeat;
+						background-size: 24px 24px;
+						background-position: center;
+					}
 				}
 				&.mu-bottom-item-active {
 					.mu-bottom-item-wrapper {

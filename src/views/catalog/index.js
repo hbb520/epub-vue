@@ -35,6 +35,7 @@ export default {
     };
   },
   created() {
+    console.log(this.currentChapter)
     this.getBookmarksList();
     this.getNoteList();
   },

@@ -9,7 +9,7 @@
 		<div class="search-container" v-loading="loading">
 			<div class="box">
 				<mu-text-field v-model="keyword" placeholder="全文搜索" action-icon="search"
-				               :action-click="search" style="width: 100%"></mu-text-field>
+				               :action-click="search" style="width: 100%" @keyup.enter.native="search"></mu-text-field>
 			</div>
 			<div class="list" v-if="result.length > 0">
 				<div class="result clearfix" v-for="(item, index) in result" :key="index">
@@ -39,6 +39,18 @@
 		.mu-bottom-nav{
 			color: #ffffff;
 			background-color: #223FEE;
+			.mu-bottom-item {
+				&:first-child {
+					i {
+						display: none;
+					}
+					.mu-bottom-item-wrapper {
+						background: url("../../assets/imgs/close.png") no-repeat;
+						background-size: 24px 24px;
+						background-position: center;
+					}
+				}
+			}
 			.title {
 				width: 100%;
 				i, p {

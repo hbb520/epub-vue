@@ -55,34 +55,6 @@
 			height: calc(100% - 60px);
 			padding-bottom: 36px;
 			position: relative;
-
-			.prev, .next {
-				width: 40px;
-				height: 150px;
-				position: absolute;
-				top: 0;
-				bottom: 0;
-				margin: auto;
-				text-align: center;
-				line-height: 150px;
-				cursor: pointer;
-				border: 1px solid rgba(34, 36, 48, 0.2);
-				border-radius: 6px;
-
-				i {
-					color: rgba(34, 36, 48, 0.5);
-					font-size: 30px;
-				}
-			}
-
-			.prev {
-				left: 0;
-			}
-
-			.next {
-				right: 0;
-			}
-
 			.bookBox {
 				width: calc(100% - 110px);
 				height: 100%;
@@ -114,7 +86,35 @@
 					width: 750px;
 				}
 
+				.prev, .next {
+					width: 40px;
+					height: 150px;
+					position: absolute;
+					top: 0;
+					bottom: 0;
+					margin: auto;
+					text-align: center;
+					line-height: 150px;
+					cursor: pointer;
+					border: 1px solid rgba(34, 36, 48, 0.2);
+					border-radius: 6px;
+
+					i {
+						color: rgba(34, 36, 48, 0.5);
+						font-size: 30px;
+					}
+				}
+
+				.prev {
+					left: -52px;
+				}
+
+				.next {
+					right: -52px;
+				}
+
 				.top, .bottom {
+					padding: 0 4%;
 					font-size: 18px;
 					line-height: 20px;
 					user-select: none;
@@ -317,6 +317,16 @@
 			color: #999999;
 			font-size: 22px;
 			line-height: 40px;
+			&.closeBtn {
+				position: absolute;
+				top: 22px;
+				right: 20px;
+				padding: 0 10px;
+				color: red;
+				font-size: 16px;
+				line-height: 24px;
+				cursor: pointer;
+			}
 		}
 		span {
 			display: block;
@@ -375,7 +385,7 @@
 					margin-left: 2px;
 				}
 			}
-			div {
+			div.content {
 				display: block;
 				width: 280px;
 				height: 60px;
@@ -426,6 +436,15 @@
 				}
 			}
 		}
+			.mask {
+				display: block;
+				position: fixed;
+				z-index: 1000;
+				cursor: pointer;
+				text-align: left;
+				background: red;
+			}
+
 	}
 	#imgDialog {
 		display: block;

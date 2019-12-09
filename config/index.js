@@ -12,7 +12,8 @@ module.exports = {
     proxyTable: {
       '/book': {
         // 测试环境
-        target: 'http://120.25.249.22:8094',  // 接口域名
+        // target: 'http://120.25.249.22:8094',  // 接口域名
+        target: 'http://huake.qanzone.com:8094',  // 接口域名
         changeOrigin: true,  //是否跨域
         pathRewrite: {// 如果接口本身没有/api需要通过pathRewrite来重写了地址
           '^book': '/book'

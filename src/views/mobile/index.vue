@@ -1,26 +1,24 @@
 <template>
 	<div class="app-container" id="mobile-container">
 		<transition name="el-zoom-in-top">
-			<mu-appbar style="width: 100%;" color="primary" v-if="menuDialogStatus" class="appbar-header">
+			<mu-appbar style="width: 100%;" color="primary" v-if="menuDialogStatus"
+			           :class="bookmarksStatus ? 'otherHeader appbar-header' : 'appbar-header'">
 				<!--      <div style="max-width: 1540px;margin: 0 auto">-->
 				<mu-button icon slot="left" @click="$goLink('/list')">
-					<mu-icon value="navigate_before"></mu-icon>
+					<img src="../../assets/imgs/return.png" alt="" style="width: 30px;">
 				</mu-button>
 				<mu-button flat slot="right" @click="menu_click">
-					<!--				<mu-icon value="menu"></mu-icon>-->
-					<i class="iconfont menuIcon iconmenu"></i>
+					<img src="../../assets/imgs/menu.png" alt="" style="width: 30px; height: 24px">
 				</mu-button>
 				<mu-button flat slot="right" @click="spellcheck_click">
-					<!--				<mu-icon value="spellcheck"></mu-icon>-->
-					<i class="iconfont menuIcon iconfontsize"></i>
+					<img src="../../assets/imgs/font.png" alt="" style="width: 30px;">
 				</mu-button>
 				<mu-button flat slot="right" @click="search_click">
-					<!--				<mu-icon value="search"></mu-icon>-->
-					<i class="iconfont menuIcon iconsearch"></i>
+					<img src="../../assets/imgs/search.png" alt="" style="width: 30px;">
 				</mu-button>
 				<mu-button flat slot="right" @click="setBookmarks">
-					<!--				<mu-icon value="bookmark_border"></mu-icon>-->
-					<i class="iconfont menuIcon icontagtool"></i>
+					<img v-if="!bookmarksStatus" src="../../assets/imgs/bookmarks.png" alt="" style="width: 30px;">
+					<img v-if="bookmarksStatus" src="../../assets/imgs/bookmarksChecked.png" alt="" style="width: 30px;">
 				</mu-button>
 			</mu-appbar>
 		</transition>
@@ -33,8 +31,8 @@
 				</div>
 				<div id="book"></div>
 				<div class="bottom">
-					<span v-if="bookInfo.currentPage && bookInfo.totalPage">
-						{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
+          <span v-if="bookInfo.currentPage && bookInfo.totalPage">
+            {{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
 				</div>
 			</div>
 		</div>
@@ -60,18 +58,18 @@
 		<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container"
 		           @close="dialogHandle">
 			<mobile-catalog v-if="catalogStatus" :id="id" :chapterList="chapterDetailList"
-			         :currentChapter="currentChapter"
-			         @closeDialog="dialogHandle" @goToChapter="goToChapter"
-			         @gotoBookmarks="gotoBookmarks" @gotoNote="gotoBookmarks"
-			         @bookmarksChange="bookmarksChange" @noteChange="noteChange"></mobile-catalog>
+			                :currentChapter="currentChapter"
+			                @closeDialog="dialogHandle" @goToChapter="goToChapter"
+			                @gotoBookmarks="gotoBookmarks" @gotoNote="gotoBookmarks"
+			                @bookmarksChange="bookmarksChange" @noteChange="noteChange"></mobile-catalog>
 			<mobile-theme v-if="themeStatus" @closeDialog="dialogHandle"
-			       @setFont="setFont" @setFontSize="setFontSize"
-			       @setLineHeight="setLineHeight" @setBackground="setBackground"></mobile-theme>
+			              @setFont="setFont" @setFontSize="setFontSize"
+			              @setLineHeight="setLineHeight" @setBackground="setBackground"></mobile-theme>
 			<mobile-search v-if="searchStatus" @closeDialog="dialogHandle" :list.sync="searchResult"
-			        @search="search" @gotoResult="gotoBookmarks"></mobile-search>
+			               @search="search" @gotoResult="gotoBookmarks"></mobile-search>
 		</mu-drawer>
 		<div id="toolTips" v-if="toolTipsStatus" :style="{'top': toolTipsMode === 'add' ? (toolTipsTop + 60 + 'px') : (toolTipsTop + 'px'),
-		'left': toolTipsLeft + 'px', 'height': toolTipsMode === 'add' ? '60px' : '120px'}">
+    'left': toolTipsLeft + 'px', 'height': toolTipsMode === 'add' ? '60px' : '120px'}">
 			<div class="colorList clearfix" v-if="toolTipsMode === 'edit'">
 				<p :class="selectedColorClassName === 'green' ? 'active' : ''">
 					<span style="background: #1CB555" @click="changeUnderlineColor('green')"></span></p>
@@ -98,7 +96,7 @@
 			<p class="complete" @click="createAnnotate()">完 成</p>
 		</div>
 		<div id="noteTipsList">
-			<!--			noteTipsList-->
+			<!--      noteTipsList-->
 			<div id="noteTips" v-for="(item, index) in noteTipsList" :key="index" :class="item.underlineClass"
 			     :style="{'top': item.top + 'px','left': item.left + 'px'}"
 			     @click="item.isShowed = !item.isShowed">
@@ -140,6 +138,28 @@
 
 		.mu-paper {
 			z-index: 2100 !important;
+		}
+		.mu-button{
+			width: 56px;
+			height: 56px;
+			margin: 0 5px;
+			border-radius: 50%;
+		}
+		.otherHeader {
+			.mu-button {
+				&:nth-child(4) {
+					&::before {
+						content: "";
+						position: absolute;
+						left: 0;
+						right: 0;
+						top: 0;
+						bottom: 0;
+						background-color: currentColor;
+						opacity: .12;
+					}
+				}
+			}
 		}
 		.el-slider {
 			.el-slider__runway{

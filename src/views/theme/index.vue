@@ -81,6 +81,18 @@
 			color: #ffffff;
 			background-color: #223FEE;
 
+			.mu-bottom-item {
+				&:first-child {
+					i {
+						display: none;
+					}
+					.mu-bottom-item-wrapper {
+						background: url("../../assets/imgs/close.png") no-repeat;
+						background-size: 24px 24px;
+						background-position: center;
+					}
+				}
+			}
 			.title {
 				width: 100%;
 

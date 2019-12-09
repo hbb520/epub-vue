@@ -17,7 +17,7 @@ export default {
         },
         {
           label: '黑体',
-          value: 'Microsoft Yahei, Heiti SC, Heiti TC',
+          value: 'SimHei',
         },
         {
           label: '宋体',

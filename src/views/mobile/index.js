@@ -44,6 +44,8 @@ export default {
       singlePageStatus: false,
       themeStatus: false,
       theme: null,
+      fs: getLS('fontSize'),
+      lh: getLS('lineHeight'),
       searchStatus: false,
       searchResult: [],
       fullScreenStatus: false,
@@ -70,6 +72,7 @@ export default {
       messageContent: null,
       surplusTop: 0,
       menuDialogStatus: false,
+      mouseSelectStatus: false,
       top: 0,
       left: 0,
     };
@@ -125,6 +128,7 @@ export default {
         this.setBookTheme();
         // 进度条初始化
         this.progress = 0;
+        this.locations = this.bookRendition.currentLocation()
         this.chapterDetailList = [];
         let index = 1;
         this.book.navigation.toc.map(item => {
@@ -209,28 +213,29 @@ export default {
           this.currentHandleWord = range.toString();
         });
 
-        // let timer
+        // 鼠标点下去
+        this.bookRendition.on('mousedown', (event, contents) => {
+          this.mouseSelectStatus = false
+        });
+
         // 鼠标松开
         this.bookRendition.on('mouseup', (event, contents) => {
-          // clearTimeout(timer)
-          // setTimeout(() => {
-          //   if (this.toolTipsStatus || this.annotateStatus) {
-          //     this.toolTipsStatus = false;
-          //     this.annotateStatus = false;
-          //     this.clearSelectInfo();
-          //   }
-          // }, 1000);
+          if(!this.mouseSelectStatus){
+            if (this.toolTipsStatus || this.annotateStatus) {
+              this.toolTipsStatus = false;
+              this.annotateStatus = false;
+              this.clearSelectInfo();
+            }
+            this.noteTipsList.map(item => {
+              item.isShowed = false;
+              return item;
+            });
+          }
+          this.mouseSelectStatus = false
         });
 
         // 点击事件
         this.bookRendition.on('click', event => {
-          // 点击目标为图片
-
-          if (this.toolTipsStatus || this.annotateStatus) {
-            this.toolTipsStatus = false;
-            this.annotateStatus = false;
-            this.clearSelectInfo();
-          }
 
           if (event.path[0].nodeName === 'IMG') {
             this.imgDialogStatus = true;
@@ -256,7 +261,7 @@ export default {
         this.bookRendition.on('markClicked', (cfiRange, object, contents) => {
           let range, rangeObj, fs = parseInt(getLS('fontSize')),
               lh = parseInt(getLS('lineHeight') * 10) / 10;
-          range = contents.range(cfiRange);
+          range = this.bookRendition.getRange(cfiRange);
           rangeObj = range.getBoundingClientRect();
           this.selectedCfi = cfiRange;
           this.selectedInfo = rangeObj;
@@ -270,6 +275,11 @@ export default {
               this.bookFrame.left + rangeObj.width / 2 - 150;
           this.top = this.toolTipsTop;
           this.left = this.toolTipsLeft;
+          this.noteTipsList.map(item => {
+            item.isShowed = false;
+            return item;
+          });
+          this.annotateStatus = false;
           this.toolTipsStatus = true;
           this.toolTipsMode = 'edit';
           this.currentHandleWord = range.toString();
@@ -285,6 +295,8 @@ export default {
       document.execCommand('Copy');
       oInput.style.display = 'none';
       document.body.removeChild(oInput);
+      this.bookRendition.getContents(
+          this.selectedCfi)[0].document.getSelection().empty();
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -294,6 +306,8 @@ export default {
     },
     // 分享
     share() {
+      this.bookRendition.getContents(
+          this.selectedCfi)[0].document.getSelection().empty();
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -313,11 +327,14 @@ export default {
         bookId: this.id,
         cfi: this.selectedCfi,
         word: this.currentHandleWord,
+        index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
         type: 'underline',  // 'underline', 'annotation'
         underlineClass: 'default',
         annotation: '',
         createTime: new Date().getTime(),
       });
+      this.bookRendition.getContents(
+          this.selectedCfi)[0].document.getSelection().empty();
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -338,6 +355,7 @@ export default {
         bookId: this.id,
         cfi: this.selectedCfi,
         word: this.currentHandleWord,
+        index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
         type: this.currentHandleAnnotateWrod ? 'annotation' : 'underline',  // 'underline', 'annotation'
         underlineClass: value,
         annotation: this.currentHandleAnnotateWrod,
@@ -373,6 +391,13 @@ export default {
       let left = 0;
       let top = this.selectedInfo.top + 195 + this.selectedInfo.height;
       this.toolTipsStatus = false;
+      this.noteTipsList.map(item => {
+        item.isShowed = false;
+        return item;
+      });
+      if(this.toolTipsMode === 'add'){
+        this.createUnderline();
+      }
       if ((top + 270) > document.body.clientHeight) {
         this.annotateShowAtTheBottom = false;
         this.annotateTop = top - 270 - this.selectedInfo.height - 20;
@@ -386,10 +411,30 @@ export default {
       this.annotateStatus = true;
       this.annotateWord = this.currentHandleAnnotateWrod;
     },
+    // 关闭批注编辑框
+    closeAnnotateDialog() {
+      if (this.toolTipsMode === 'add') {
+        this.bookRendition.annotations.remove(this.selectedCfi, 'underline');
+        removeNote(this.id, this.selectedCfi);
+      }
+      this.annotateStatus = false;
+      this.clearSelectInfo();
+    },
+    // 编辑批注
+    editAnnotate(item) {
+      this.bookRendition.emit('markClicked', item.cfi, {
+        cfiRange: item.cfi,
+        className: item.underlineClass,
+        annotation: item.annotation,
+      });
+      this.openAnnotateDialog()
+    },
     // 批注
     createAnnotate() {
-      if (this.annotateWord === null) {
-        this.$message.warning('内容不能为空!');
+      if(this.annotateWord === null){
+        this.message('批注内容不能为空!');
+        this.closeAnnotateDialog()
+        return true
       }
       this.bookRendition.annotations.remove(this.selectedCfi, 'underline');
       removeNote(this.id, this.selectedCfi);
@@ -405,6 +450,7 @@ export default {
         bookId: this.id,
         cfi: this.selectedCfi,
         word: this.currentHandleWord,
+        index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
         type: 'annotation',  // 'underline', 'annotation'
         underlineClass: this.selectedColorClassName
             ? this.selectedColorClassName
@@ -490,6 +536,10 @@ export default {
     },
     // 清理选中信息
     clearSelectInfo() {
+      this.noteTipsList.map(item => {
+        item.isShowed = false;
+        return item;
+      });
       this.toolTipsMode = 'add';
       this.selectedCfi = null;
       this.selectedColorClassName = null;
@@ -711,6 +761,7 @@ export default {
           endCfi: objEnd.cfi,
           href: objStart.href,
           word: word,
+          index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
           createTime: new Date().getTime(),
         });
         this.bookmarksStatus = true;

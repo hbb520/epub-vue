@@ -23,6 +23,7 @@ export function removeToken() {
 //   "endCfi": String,
 //   "href": String,
 //   "word": String,
+//   "index": Number,
 //   "createTime": Date,
 // }
 
@@ -40,14 +41,22 @@ export function removeLS(key) {
 
 export function getBookmarks(id) {
   let key = 'bookmarks-' + id;
-  let list = JSON.parse(LocalStorage.getItem(key)) || []
+  let list = JSON.parse(LocalStorage.getItem(key)) || [];
   return list;
 }
 
 export function setBookmarks(id, obj) {
   let key = 'bookmarks-' + id;
   let bookmarksList = getBookmarks(id) || [];
-  bookmarksList.push(obj);
+  if (bookmarksList.some(item => {
+    return item.cfi === obj.cfi;
+  })) {
+    bookmarksList = bookmarksList.map(item => {
+      return item.cfi === obj.cfi ? obj : item;
+    });
+  } else {
+    bookmarksList.push(obj);
+  }
   return LocalStorage.setItem(key, JSON.stringify(bookmarksList));
 }
 
@@ -70,23 +79,31 @@ export function removeBookmarks(id, value) {
 //   "bookId": Number,
 //   "cfi": String,
 //   "word": String,
+//   "index": Number,
 //   "type": String,  // 'underline', 'annotation'
 //   "underlineClass": String,
 //   "annotation": String,
 //   "createTime": Date,
 // }
 
-
 export function getNote(id) {
   let key = 'note-' + id;
-  let list = JSON.parse(LocalStorage.getItem(key)) || []
+  let list = JSON.parse(LocalStorage.getItem(key)) || [];
   return list;
 }
 
 export function setNote(id, obj) {
   let key = 'note-' + id;
   let noteList = getNote(id) || [];
-  noteList.push(obj);
+  if (noteList.some(item => {
+    return item.cfi === obj.cfi;
+  })) {
+    noteList = noteList.map(item => {
+      return item.cfi === obj.cfi ? obj : item;
+    });
+  } else {
+    noteList.push(obj);
+  }
   return LocalStorage.setItem(key, JSON.stringify(noteList));
 }
 

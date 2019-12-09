@@ -1,34 +1,30 @@
 <template>
 	<div class="app-container" id="index-container">
-		<mu-appbar style="width: 100%;" color="primary" class="appbar-header">
+		<mu-appbar style="width: 100%;" color="primary" :class="bookmarksStatus ? 'otherHeader appbar-header' : 'appbar-header'">
 			<!--      <div style="max-width: 1540px;margin: 0 auto">-->
 			<mu-button icon slot="left" @click="$goLink('/list')">
-				<mu-icon value="navigate_before"></mu-icon>
+				<img src="../../assets/imgs/return.png" alt="" style="width: 30px;">
 			</mu-button>
 			<mu-button flat slot="right" @click="menu_click">
-<!--				<mu-icon value="menu"></mu-icon>-->
-				<i class="iconfont menuIcon iconmenu"></i>
+				<img src="../../assets/imgs/menu.png" alt="" style="width: 30px; height: 24px">
 			</mu-button>
 			<mu-button flat slot="right" @click="spellcheck_click">
-<!--				<mu-icon value="spellcheck"></mu-icon>-->
-				<i class="iconfont menuIcon iconfontsize"></i>
+				<img src="../../assets/imgs/font.png" alt="" style="width: 30px;">
 			</mu-button>
-			<mu-button flat slot="right" @click="setPageType">
-<!--				<mu-icon value="library_books"></mu-icon>-->
-				<i class="iconfont menuIcon icondoublepage" v-if="!singlePageStatus"></i>
-				<i class="iconfont menuIcon iconpage" v-if="singlePageStatus"></i>
+			<mu-button flat slot="right" @click="setPageType" :class="singlePageStatus ? 'active' : ''">
+				<img v-if="!singlePageStatus" src="../../assets/imgs/single.png" alt="" style="width: 30px;">
+				<img v-if="singlePageStatus" src="../../assets/imgs/single.png" alt="" style="width: 30px;">
 			</mu-button>
 			<mu-button flat slot="right" @click="search_click">
-<!--				<mu-icon value="search"></mu-icon>-->
-				<i class="iconfont menuIcon iconsearch"></i>
+				<img src="../../assets/imgs/search.png" alt="" style="width: 30px;">
 			</mu-button>
 			<mu-button flat slot="right" @click="setBookmarks">
-<!--				<mu-icon value="bookmark_border"></mu-icon>-->
-				<i class="iconfont menuIcon icontagtool"></i>
+				<img v-if="!bookmarksStatus" src="../../assets/imgs/bookmarks.png" alt="" style="width: 30px;">
+				<img v-if="bookmarksStatus" src="../../assets/imgs/bookmarksChecked.png" alt="" style="width: 30px;">
 			</mu-button>
 			<mu-button flat slot="right" @click="setFullscreen">
-<!--				<mu-icon value="crop_free"></mu-icon>-->
-				<i class="iconfont menuIcon iconfullscreen"></i>
+				<img v-if="!fullScreenStatus" src="../../assets/imgs/fullscreen.png" alt="" style="width: 30px;">
+				<img v-if="fullScreenStatus" src="../../assets/imgs/fullscreen.png" alt="" style="width: 30px;">
 			</mu-button>
 			<!--      </div>-->
 		</mu-appbar>
@@ -42,10 +38,10 @@
 				<span v-if="bookInfo.currentChapter" class="last">{{ bookInfo.currentChapter }}</span>
 			</div>
 			<div class="book-container clearfix">
-				<div class="prev" @click="prev" v-if="prevStatus">
-					<i class="iconfont iconleft"></i>
-				</div>
 				<div :class="singlePageStatus ? ('bookBox singlePage ' + theme) : ('bookBox ' + theme)">
+					<div class="prev" @click="prev" v-if="prevStatus">
+						<i class="iconfont iconleft"></i>
+					</div>
 					<div class="top clearfix">
 						<span>{{ bookInfo.title }}</span>
 						<i class="iconfont iconsign" v-if="bookmarksStatus"></i>
@@ -60,11 +56,11 @@
 						<span v-if="bookInfo.currentPage && bookInfo.totalPage">
 							{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
 					</div>
+					<div class="next" @click="next" v-if="nextStatus">
+						<i class="iconfont iconright"></i>
+					</div>
 					<img v-if="!singlePageStatus" class="middleLine"
 					     src="../../assets/imgs/middleLine.png" alt="">
-				</div>
-				<div class="next" @click="next" v-if="nextStatus">
-					<i class="iconfont iconright"></i>
 				</div>
 			</div>
 		</div>
@@ -108,19 +104,28 @@
 		<div id="annotate" :class="annotateShowAtTheBottom ? '' : 'top'" v-if="annotateStatus"
 		     :style="{'top': annotateTop + 'px', 'left': annotateLeft + 'px'}">
 			<p>批注</p>
+			<p class="closeBtn" @click="closeAnnotateDialog()">关闭</p>
 			<span class="wordOverflow">{{ currentHandleWord }}</span>
 			<el-input type="textarea" v-model="annotateWord" :rows="5"></el-input>
 			<p class="complete" @click="createAnnotate()">完 成</p>
 		</div>
 		<div id="noteTipsList">
-<!--			noteTipsList-->
-			<div id="noteTips" v-for="(item, index) in noteTipsList" :key="index" :class="item.underlineClass" :style="{'top': item.top + 'px','left': item.left + 'px'}"
-			     @click="item.isShowed = !item.isShowed">
-				<span></span>
-				<span></span>
-				<span></span>
-				<div v-if="item.isShowed"><p class="wordOverflow">{{ item.annotation }}</p></div>
+			<!--			noteTipsList-->
+			<div id="noteTips" v-for="(item, index) in noteTipsList" :key="index"
+			     :class="item.underlineClass" :style="{'top': item.top + 'px','left': item.left + 'px'}">
+				<div class="clearfix" @click="item.isShowed = !item.isShowed; annotateStatus = false;
+				toolTipsStatus = false">
+					<span></span>
+					<span></span>
+					<span></span>
+				</div>
+				<div class="content" v-if="item.isShowed">
+					<p class="wordOverflow" @click.stop="editAnnotate(item)">{{ item.annotation }}</p>
+				</div>
 			</div>
+			<!--			<p class="mask" v-for="(item, index) in noteTipsList" :key="'note' + index" :class="item.underlineClass" :style="{'top': item.top + 'px','left': item.left + 'px',-->
+			<!--			'fontSize': fs + 'px','lineHeight': lh}"-->
+			<!--			   @click="one(item)">{{ item.word }}</p>-->
 		</div>
 		<div id="imgDialog" v-if="imgDialogStatus" @click="imgDialogStatus = false">
 			<img :src="imgSrc" alt="">
@@ -178,6 +183,30 @@
 			z-index: 2100 !important;
 		}
 
+		.mu-button{
+			width: 60px;
+			height: 60px;
+			margin: 0 5px;
+			border-radius: 50%;
+		}
+
+		.otherHeader {
+			.mu-button {
+				&:nth-child(5) {
+					&::before {
+						content: "";
+						position: absolute;
+						left: 0;
+						right: 0;
+						top: 0;
+						bottom: 0;
+						background-color: currentColor;
+						opacity: .12;
+					}
+				}
+			}
+		}
+
 		@media (min-width: 600px) {
 			#progress {
 				height: calc(100vh - 100px);
@@ -191,34 +220,50 @@
 
 		.epub-view {
 			svg {
-				g{
+				g {
 					rect {
 						stroke: none;
 					}
+
 					line {
 						stroke-opacity: 1;
 					}
+
 					&.default {
+						cursor: pointer;
+
 						line {
 							stroke: #3652F8;
 						}
 					}
+
 					&.green {
+						cursor: pointer;
+
 						line {
 							stroke: #1CB555;
 						}
 					}
+
 					&.orange {
+						cursor: pointer;
+
 						line {
 							stroke: #F19149;
 						}
 					}
+
 					&.blue {
+						cursor: pointer;
+
 						line {
 							stroke: #00A0E9;
 						}
 					}
+
 					&.violet {
+						cursor: pointer;
+
 						line {
 							stroke: #C490BF;
 						}
