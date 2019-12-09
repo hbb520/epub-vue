@@ -14,7 +14,7 @@
     "svgo": "svgo -f src/icons/svg --config=src/icons/svgo.yml"
   },
   "dependencies": {
-    "axios": "0.18.0",
+    "axios": "0.19.0",
     "cross-env": "^5.2.0",
     "element-ui": "2.12.0",
     "epubjs": "^0.3.85",
