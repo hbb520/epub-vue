@@ -26,16 +26,16 @@ export default {
       getList().then(async res => {
         if (res && res.data && Array.isArray(res.data)) {
           for (let i = 0; i < res.data.length; i++) {
-            let book = ePub('http://huake.qanzone.com:8094/' + res.data[i].path)
+            let book = ePub('http://huake.qanzone.com:8094/' + res.data[i].path);
             book.ready.then((arr) => {
-             book.archive.getBase64(book.cover).then(url => {
-               this.bookList.push({
-                 id: res.data[i].id,
-                 title: arr[2].title,
-                 path: res.data[i].path,
-                 cover: url,
-               });
-             })
+              book.archive.getBase64(book.cover).then(url => {
+                this.bookList.push({
+                  id: res.data[i].id,
+                  title: arr[2].title,
+                  path: res.data[i].path,
+                  cover: url,
+                });
+              });
             });
           }
         }
@@ -44,28 +44,17 @@ export default {
       });
     },
     delBook(id) {
-      this.$confirm('此操作将删除该图书, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }).then(() => {
-        const params = {
-          'bookId': id,
-        };
-        delBook(params).then(res => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!',
-          });
-          this.getBookList();
-        }, error => {
-          this.$message.error(error);
-        });
-      }).catch(() => {
+      const params = {
+        'bookId': id,
+      };
+      delBook(params).then(res => {
         this.$message({
-          type: 'info',
-          message: '已取消删除',
+          type: 'success',
+          message: '删除成功!',
         });
+        this.getBookList();
+      }, error => {
+        this.$message.error(error);
       });
     },
     uploading(event, file, fileList) {
@@ -116,7 +105,7 @@ export default {
       } else {
         this.isPhoneClient = true;
       }
-    }
+    },
   },
 };
 

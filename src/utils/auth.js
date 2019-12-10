@@ -49,10 +49,10 @@ export function setBookmarks(id, obj) {
   let key = 'bookmarks-' + id;
   let bookmarksList = getBookmarks(id) || [];
   if (bookmarksList.some(item => {
-    return item.cfi === obj.cfi;
+    return item.startCfi === obj.startCfi;
   })) {
     bookmarksList = bookmarksList.map(item => {
-      return item.cfi === obj.cfi ? obj : item;
+      return item.startCfi === obj.startCfi ? obj : item;
     });
   } else {
     bookmarksList.push(obj);

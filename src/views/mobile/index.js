@@ -10,6 +10,7 @@ import {
   getNote,
   setNote,
   removeNote,
+  removeBookmarks,
 } from '../../utils/auth';
 
 const ePub = window.ePub;
@@ -40,6 +41,7 @@ export default {
       currentChapter: {},
       chapterDetailList: [],
       bookmarksStatus: false,
+      bookmarksId: null,
       bookFrame: null,
       singlePageStatus: false,
       themeStatus: false,
@@ -73,8 +75,6 @@ export default {
       surplusTop: 0,
       menuDialogStatus: false,
       mouseSelectStatus: false,
-      top: 0,
-      left: 0,
     };
   },
   components: {
@@ -128,7 +128,7 @@ export default {
         this.setBookTheme();
         // 进度条初始化
         this.progress = 0;
-        this.locations = this.bookRendition.currentLocation()
+        this.locations = this.bookRendition.currentLocation();
         this.chapterDetailList = [];
         let index = 1;
         this.book.navigation.toc.map(item => {
@@ -215,12 +215,12 @@ export default {
 
         // 鼠标点下去
         this.bookRendition.on('mousedown', (event, contents) => {
-          this.mouseSelectStatus = false
+          this.mouseSelectStatus = false;
         });
 
         // 鼠标松开
         this.bookRendition.on('mouseup', (event, contents) => {
-          if(!this.mouseSelectStatus){
+          if ( !this.mouseSelectStatus) {
             if (this.toolTipsStatus || this.annotateStatus) {
               this.toolTipsStatus = false;
               this.annotateStatus = false;
@@ -231,30 +231,29 @@ export default {
               return item;
             });
           }
-          this.mouseSelectStatus = false
+          this.mouseSelectStatus = false;
         });
 
         // 点击事件
         this.bookRendition.on('click', event => {
-
-          if (event.path[0].nodeName === 'IMG') {
-            this.imgDialogStatus = true;
-            this.imgSrc = event.path[0].src;
-          } else if (event.pageX % this.bookFrame.width < 0.3 *
-              this.bookFrame.width) {
-            this.menuDialogStatus = false
-            this.prevStatus && this.prev();
-          } else if ((event.pageX % this.bookFrame.width >= 0.3 *
-              this.bookFrame.width) &&
-              (event.pageX % this.bookFrame.width <= 0.7 *
-                  this.bookFrame.width)) {
-            this.menuDialogStatus = !this.menuDialogStatus;
-          } else if (event.pageX % this.bookFrame.width > 0.7 *
-              this.bookFrame.width) {
-            this.menuDialogStatus = false
-            this.nextStatus && this.next();
+          if ( !this.menuDialogStatus) {
+            if (event.pageX % this.bookFrame.width < 0.3 *
+                this.bookFrame.width) {
+              this.menuDialogStatus = false;
+              this.prevStatus && this.prev();
+            } else if ((event.pageX % this.bookFrame.width >= 0.3 *
+                this.bookFrame.width) &&
+                (event.pageX % this.bookFrame.width <= 0.7 *
+                    this.bookFrame.width)) {
+              this.menuDialogStatus = !this.menuDialogStatus;
+            } else if (event.pageX % this.bookFrame.width > 0.7 *
+                this.bookFrame.width) {
+              this.menuDialogStatus = false;
+              this.nextStatus && this.next();
+            }
+          } else {
+            this.menuDialogStatus = false;
           }
-
         });
 
         // 点击选中文字
@@ -395,7 +394,7 @@ export default {
         item.isShowed = false;
         return item;
       });
-      if(this.toolTipsMode === 'add'){
+      if (this.toolTipsMode === 'add') {
         this.createUnderline();
       }
       if ((top + 270) > document.body.clientHeight) {
@@ -427,14 +426,14 @@ export default {
         className: item.underlineClass,
         annotation: item.annotation,
       });
-      this.openAnnotateDialog()
+      this.openAnnotateDialog();
     },
     // 批注
     createAnnotate() {
-      if(this.annotateWord === null){
+      if (this.annotateWord === null) {
         this.message('批注内容不能为空!');
-        this.closeAnnotateDialog()
-        return true
+        this.closeAnnotateDialog();
+        return true;
       }
       this.bookRendition.annotations.remove(this.selectedCfi, 'underline');
       removeNote(this.id, this.selectedCfi);
@@ -550,6 +549,7 @@ export default {
     // 书签变更
     bookmarksChange() {
       this.bookmarksStatus = false;
+      this.bookmarksId = null;
       let startLocations = this.book.locations.locationFromCfi(
           this.locations.start.cfi);
       let endLocations = this.book.locations.locationFromCfi(
@@ -557,9 +557,14 @@ export default {
       this.bookmarksStatus = getBookmarks(this.id).some(val => {
         let resultLocations = this.book.locations.locationFromCfi(
             val.startCfi);
-        return resultLocations >= startLocations && resultLocations <
+        if (resultLocations >= startLocations && resultLocations <
             endLocations && resultLocations <
-            ((endLocations + startLocations) / 2);
+            ((endLocations + startLocations) / 2)) {
+          this.bookmarksId = val.id;
+          return true;
+        } else {
+          return false;
+        }
       });
     },
     // 笔记变更
@@ -745,26 +750,29 @@ export default {
     // 设置书签
     setBookmarks() {
       if (this.bookmarksStatus) {
-        return true;
-      }
-      let objStart = this.locations && this.locations.start;
-      let objEnd = this.locations && this.locations.end;
-      let content = this.bookRendition.getRange(objStart.cfi) &&
-          this.bookRendition.getRange(objStart.cfi).commonAncestorContainer;
-      let word = content && content.data;
-      let isSign = word.split(' ').some(val => val === '\n');
-      if ( !isSign) {
-        setBookmarks(this.id, {
-          id: this.id + new Date().getTime(),
-          bookId: this.id,
-          startCfi: objStart.cfi,
-          endCfi: objEnd.cfi,
-          href: objStart.href,
-          word: word,
-          index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
-          createTime: new Date().getTime(),
-        });
-        this.bookmarksStatus = true;
+        removeBookmarks(this.id, this.bookmarksId);
+        this.bookmarksStatus = false;
+      } else {
+        let objStart = this.locations && this.locations.start;
+        let objEnd = this.locations && this.locations.end;
+        let content = this.bookRendition.getRange(objStart.cfi) &&
+            this.bookRendition.getRange(objStart.cfi).commonAncestorContainer;
+        let word = content && content.data;
+        let isSign = word.split(' ').some(val => val === '\n');
+        if ( !isSign) {
+          setBookmarks(this.id, {
+            id: this.id + new Date().getTime(),
+            bookId: this.id,
+            startCfi: objStart.cfi,
+            endCfi: objEnd.cfi,
+            href: objStart.href,
+            word: word,
+            index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+            createTime: new Date().getTime(),
+          });
+          this.bookmarksId = this.id + new Date().getTime();
+          this.bookmarksStatus = true;
+        }
       }
     },
     // 书签跳转
@@ -813,39 +821,36 @@ export default {
     // 设置单/双页模式
     setPageType() {
       let width = document.body.clientWidth;
-      if (width > 1133) {
-        this.screenIsChange = true;
-        this.singlePageStatus = !this.singlePageStatus;
-        this.surplusTop = 21;
-        setTimeout(() => {
-          this.bookFrame = document.getElementById('book').
-              getBoundingClientRect();
-          if ( !this.singlePageStatus) {
-            this.bookRendition.resize(this.bookFrame.width);
-          } else {
-            this.bookRendition.resize(640);
-          }
-          this.bookRendition.display(this.locations.start.cfi);
-          this.toolTipsStatus = false;
-          this.annotateStatus = false;
-        }, 100);
-      }
+      this.screenIsChange = true;
+      this.singlePageStatus = !this.singlePageStatus;
+      this.surplusTop = 21;
+      setTimeout(() => {
+        this.bookFrame = document.getElementById('book').
+            getBoundingClientRect();
+        if ( !this.singlePageStatus) {
+          this.bookRendition.resize(this.bookFrame.width);
+        } else {
+          this.bookRendition.resize(630);
+        }
+        this.bookRendition.display(this.locations.start.cfi);
+        this.toolTipsStatus = false;
+        this.annotateStatus = false;
+      }, 100);
     },
     // 监听屏幕大小变化
     screenWidthChange() {
       window.onresize = () => {
         this.screenIsChange = true;
-        this.singlePageStatus = this.bookFrame.width < 800
-            ? false
-            : this.singlePageStatus;
         this.surplusTop = 21;
-        setTimeout(() => {
-          this.bookFrame = document.getElementById('book').
-              getBoundingClientRect();
-          this.bookRendition.resize(this.bookFrame.width);
-          this.toolTipsStatus = false;
-          this.annotateStatus = false;
-        }, 100);
+        if (document.body.clientWidth >= 1200) {
+          setTimeout(() => {
+            this.bookFrame = document.getElementById('book').
+                getBoundingClientRect();
+            this.bookRendition.resize(this.bookFrame.width);
+            this.toolTipsStatus = false;
+            this.annotateStatus = false;
+          }, 100);
+        }
       };
     },
     // 全屏
@@ -882,7 +887,7 @@ export default {
       }
       if (isClose) {
         this.drawer_open = false;
-        this.menuDialogStatus = false
+        this.menuDialogStatus = false;
       }
     },
     // 消息

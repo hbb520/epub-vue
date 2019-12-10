@@ -101,12 +101,12 @@
 <style scoped rel="stylesheet/scss" lang="scss">
 	#sliderContainer {
 		width: 21px;
-		height: calc(100% - 56px);
-		position: fixed;
+		height: calc(100vh - 64px);
+		position: absolute;
+		top: 64px;
 		right: 20px;
-		top: 56px;
 		margin: auto;
-		z-index: 1000;
+		z-index: 1200;
 
 		#sliderBox {
 			width: 1px;
@@ -182,13 +182,6 @@
 					}
 				}
 			}
-		}
-	}
-
-	@media (min-width: 600px) {
-		#sliderContainer {
-			height: calc(100vh - 64px);
-			top: 64px;
 		}
 	}
 </style>
