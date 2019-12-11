@@ -400,7 +400,6 @@ export default {
               this.selectedInfo.width / 2 - 250;
         }
       } else {
-        console.log(22222);
         this.annotateShowAtTheBottom = true;
         this.annotateTop = top;
         this.annotateLeft = (this.selectedInfo.left - left) %
@@ -489,7 +488,6 @@ export default {
     },
     // 获取批注标记坐标
     getNoteTipsPosition(cfi) {
-      console.log(this.bookFrame.width)
       let left, top, range, otherRange, rangeObj, otherRangeObj,
           fs = parseInt(getLS('fontSize')),
           lh = parseInt(getLS('lineHeight') * 10) / 10;
@@ -504,24 +502,28 @@ export default {
       top = otherRangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
           this.surplusTop;
       left = otherRangeObj.left % this.bookFrame.width + this.bookFrame.left;
-      if (Math.abs(otherRangeObj.left % this.bookFrame.width - 0.04 *
-          this.bookFrame.width) < 10
-          || Math.abs(otherRangeObj.left % this.bookFrame.width - 0.54 *
-              this.bookFrame.width) < 10) {
-        if (otherRangeObj.top <= (3 * lh / 0.4 + fs - 6)) {
-          if (Math.abs(otherRangeObj.left % this.bookFrame.width - 0.04 *
-              this.bookFrame.width) < 10) {
-            top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
-                this.surplusTop;
-            left = left + 0.92 * this.bookFrame.width - 5;
+      if(this.singlePageStatus){
+
+      }else {
+        if (Math.abs(otherRangeObj.left % this.bookFrame.width - 0.04 *
+            this.bookFrame.width) < 10
+            || Math.abs(otherRangeObj.left % this.bookFrame.width - 0.54 *
+                this.bookFrame.width) < 10) {
+          if (otherRangeObj.top <= (3 * lh / 0.4 + fs - 6)) {
+            if (Math.abs(otherRangeObj.left % this.bookFrame.width - 0.04 *
+                this.bookFrame.width) < 10) {
+              top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
+                  this.surplusTop + rangeObj.height - fs * lh - 2;
+              left = left + 0.92 * this.bookFrame.width - 5;
+            } else {
+              top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
+                  this.surplusTop + rangeObj.height - fs * lh - 2;
+              left = left - 0.08 * this.bookFrame.width - 3;
+            }
           } else {
-            top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
-                this.surplusTop;
-            left = left - 0.08 * this.bookFrame.width - 3;
+            top = top - fs * lh - this.surplusTop;
+            left = left + 0.42 * this.bookFrame.width - 3;
           }
-        } else {
-          top = top - fs * lh - this.surplusTop;
-          left = left + 0.42 * this.bookFrame.width - 3;
         }
       }
       let extraTop, extraLeft;
@@ -533,7 +535,7 @@ export default {
       }
       return {
         top: top + extraTop,
-        left: left
+        left: left,
       };
     },
     // 清理选中信息
@@ -553,15 +555,19 @@ export default {
     bookmarksChange() {
       this.bookmarksStatus = false;
       this.bookmarksId = null;
-      let startLocations = this.book.locations.locationFromCfi(
-          this.locations.start.cfi);
-      let endLocations = this.book.locations.locationFromCfi(
-          this.locations.end.cfi);
+      let startCfiArr = this.locations.start.cfi.split('!');
+      let cfi = startCfiArr[0] + '!/' + startCfiArr[1].split('/')[1] + '/'
+          + (parseInt(startCfiArr[1].split('/')[2]) + 2) + '/1:0)';
+      let startObjLeft = this.bookRendition.getRange(cfi) && this.bookRendition.getRange(cfi).
+          getBoundingClientRect().left;
+      let endObjLeft = this.bookRendition.getRange(this.locations.end.cfi) &&
+          this.bookRendition.getRange(this.locations.end.cfi).
+          getBoundingClientRect().left;
       this.bookmarksStatus = getBookmarks(this.id).some(val => {
-        let resultLocations = this.book.locations.locationFromCfi(
-            val.startCfi);
-        if (resultLocations >= startLocations && resultLocations <
-            endLocations) {
+        let cfiObjLeft = this.bookRendition.getRange(val.startCfi) &&
+            this.bookRendition.getRange(val.startCfi).
+            getBoundingClientRect().left;
+        if (cfiObjLeft >= startObjLeft && cfiObjLeft < endObjLeft) {
           this.bookmarksId = val.id;
           return true;
         } else {
@@ -571,26 +577,24 @@ export default {
     },
     // 页面变化笔记回显
     noteChange(cfi) {
-      console.log(cfi)
       let noteList = getNote(this.id);
       this.bookRendition.annotations.remove(cfi, 'underline');
       noteList.map(item => {
         this.bookRendition.annotations.remove(item.cfi, 'underline');
       });
-      let startLocations = this.book.locations.locationFromCfi(
-          this.locations.start.cfi);
-      let endLocations = this.book.locations.locationFromCfi(
-          this.locations.end.cfi);
-      this.toolTipsList = [];
+      let startCfiArr = this.locations.start.cfi.split('!');
+      let startCfi = startCfiArr[0] + '!/' + startCfiArr[1].split('/')[1] + '/'
+          + (parseInt(startCfiArr[1].split('/')[2]) + 2) + '/1:0)';
+      let startObjLeft = this.bookRendition.getRange(startCfi) && this.bookRendition.getRange(startCfi).
+          getBoundingClientRect().left - 2 * parseInt(getLS('fontSize'));
+      let endObjLeft = startObjLeft + 0.92 * this.bookFrame.width;
       this.noteTipsList = [];
+      this.toolTipsList = [];
       noteList.map((item, index, arr) => {
-        let noteStatus = arr.some(val => {
-          let resultLocations = this.book.locations.locationFromCfi(
-              val.cfi);
-          return resultLocations > startLocations && resultLocations <=
-              endLocations;
-        });
-        if (noteStatus) {
+        let cfiObjLeft = this.bookRendition.getRange(item.cfi) &&
+            this.bookRendition.getRange(item.cfi).
+            getBoundingClientRect().left;
+        if ((cfiObjLeft >= startObjLeft) && (cfiObjLeft <= endObjLeft)) {
           this.toolTipsList.push(item.cfi);
           this.bookRendition.annotations.add('underline', item.cfi, {
             cfiRange: item.cfi,
@@ -604,6 +608,8 @@ export default {
               ...item,
             });
           }
+        }else{
+          return item
         }
       });
     },
@@ -760,11 +766,14 @@ export default {
             this.bookRendition.getRange(objStart.cfi).commonAncestorContainer;
         let word = content && content.data;
         let isSign = word.split(' ').some(val => val === '\n');
+        let baseUrl = objStart.cfi.split('!')[0];
+        let detailUrl = objStart.cfi.split('!')[1].split('/');
         if ( !isSign) {
           setBookmarks(this.id, {
             id: this.id + new Date().getTime(),
             bookId: this.id,
-            startCfi: objStart.cfi,
+            startCfi: baseUrl + '!/' + detailUrl[1] + '/' + detailUrl[2] + ',' +
+                '/1:0,/1:1)',
             endCfi: objEnd.cfi,
             href: objStart.href,
             word: word,
@@ -833,8 +842,8 @@ export default {
         } else {
           this.bookRendition.resize(630);
         }
-        this.bookmarksChange();
-        this.noteChange();
+        // this.bookmarksChange();
+        // this.noteChange();
         let location = this.book.locations.locationFromCfi(
             this.locations.start.cfi);
         let cfi = this.book.locations.cfiFromLocation(location + 1);

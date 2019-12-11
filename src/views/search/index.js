@@ -18,8 +18,9 @@ export default {
     result() {
       if (this.list.length > 0) {
         return this.list.map(val => {
-          let html = val.excerpt.split(this.keyword).
-              join(`<span style="color: #048D01">${ this.keyword }</span>`);
+          let htmlArr = val.excerpt.split(this.keyword)
+          htmlArr[0] = '...'
+          let html = htmlArr.join(`<span style="color: #048D01">${ this.keyword }</span>`);
           return {
             html: html,
             ...val,

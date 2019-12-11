@@ -70,7 +70,7 @@ export default {
     },
     // 字体大小加一
     add() {
-      if (this.fontsize < 50) {
+      if (this.fontsize < 30) {
         this.fontsize++;
         this.$emit('setFontSize', this.fontsize)
       }

@@ -23,18 +23,25 @@ export default {
   methods: {
     getBookList() {
       this.bookList = [];
-      getList().then(async res => {
+      getList().then(res => {
         if (res && res.data && Array.isArray(res.data)) {
           for (let i = 0; i < res.data.length; i++) {
             let book = ePub('http://huake.qanzone.com:8094/' + res.data[i].path);
+            this.bookList.push({
+              id: res.data[i].id,
+              title: res.data[i].name,
+              path: res.data[i].path,
+              cover: null,
+            });
             book.ready.then((arr) => {
               book.archive.getBase64(book.cover).then(url => {
-                this.bookList.push({
-                  id: res.data[i].id,
-                  title: arr[2].title,
-                  path: res.data[i].path,
-                  cover: url,
-                });
+                this.bookList.map( item => {
+                  if(item.id === res.data[i].id) {
+                    item.title = arr[2].title
+                    item.cover = url
+                  }
+                  return item
+                })
               });
             });
           }

@@ -1,7 +1,7 @@
 <template>
 	<div id="book-list-container" :class="isPhoneClient ? 'mobileContainer' : 'pcContainer'">
 		<mu-appbar style="width: 100%;" color="primary" class="appbar-header">
-			<div style="max-width: 1540px;margin: 0 auto">
+			<div style="max-width: 1540px; padding: 0 30px; margin: 0 auto">
 				<mu-button icon slot="left">
 <!--					<mu-icon value="book"></mu-icon>-->
 					<i class="iconfont iconbook"></i>
@@ -14,10 +14,12 @@
 
 		<ul class="clearfix">
 			<li class="item" v-for="(item, index) in bookList" :key="index">
-				<div class="img-box" @click="$goLink(isPhoneClient ? '/mobileIndex' : '/index', {'id': item.id, 'path': item.path})">
-					<div class="img" :style="{'backgroundImage': 'url('+ item.cover +')'}"></div>
+				<div class="img-box" @click="$goLink(isPhoneClient ? '/mobileIndex' : '/index',
+				{'id': item.id, 'path': item.path})">
+					<div class="img" :class="item.cover ? '' : 'nocover'" :style="{'backgroundImage':
+					item.cover ? ('url(' + item.cover +')'): 'none' }"></div>
 				</div>
-				<div class="book-name">{{ item.title }}</div>
+				<div class="book-name wordOverflow">{{ item.title }}</div>
 				<p v-if="!isPhoneClient" class="delBtn" @click="delBook(item.id)">删除</p>
 				<p v-if="isPhoneClient" class="delBtn" @click="delBook(item.id)">
 					<i class="iconfont iconclose"></i>
@@ -28,7 +30,7 @@
 					<el-progress type="circle" :percentage="progress"
 					             style="margin-top: 50px"></el-progress>
 				</div>
-				<div class="book-name">{{ uploadFileList[0].name }}</div>
+				<div class="book-name wordOverflow">{{ uploadFileList[0].name }}</div>
 				<p v-if="!isPhoneClient" class="delBtn" @click="delUploadingBook()">删除</p>
 				<p v-if="isPhoneClient" class="delBtn" @click="delUploadingBook()">
 					<i class="iconfont iconclose"></i>

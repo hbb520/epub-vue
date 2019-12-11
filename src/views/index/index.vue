@@ -40,8 +40,6 @@
 					<span @click="$goLink('/list')">首页</span>
 					<span v-if="bookInfo.title">></span>
 					<span v-if="bookInfo.title">{{ bookInfo.title }}</span>
-					<span v-if="bookInfo.currentChapter">></span>
-					<span v-if="bookInfo.currentChapter" class="last">{{ bookInfo.currentChapter }}</span>
 				</div>
 				<div class="book-container clearfix">
 					<div :class="singlePageStatus ? ('bookBox singlePage ' + theme) : ('bookBox ' + theme)">
@@ -51,7 +49,7 @@
 						<div class="top clearfix">
 							<span>{{ bookInfo.title }}</span>
 							<i class="iconfont iconsign" v-if="bookmarksStatus"></i>
-							<span>{{ bookInfo.currentChapter }}</span>
+							<span class="wordOverflow">{{ bookInfo.currentChapter }}</span>
 						</div>
 						<div id="book" v-loading="bookLoading" element-loading-text="图书加载中, 请耐心等待..."
 						     element-loading-spinner="el-icon-loading"
