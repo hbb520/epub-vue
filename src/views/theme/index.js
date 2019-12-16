@@ -33,7 +33,7 @@ export default {
         },
         {
           label: '方体',
-          value: 'PingFang SC, PingFang TC',
+          value: 'PingFangSC-Regular, sans-serif',
         },
       ],
       backgroundList: [
@@ -58,7 +58,6 @@ export default {
     },
     // 字体
     setFont(value) {
-      console.log(value)
       this.$emit('setFont', value)
     },
     // 字体大小减一

@@ -35,7 +35,7 @@
         height: document.body.clientHeight,
         moveStatus: false,
         tipStatus: false,
-        tipTop: 0
+        tipTop: 0,
       };
     },
     computed: {
@@ -55,13 +55,32 @@
           let headerHeight = this.width < 600 ? 56 : 64;
           return this.progress * (this.height - headerHeight - 36) / 100;
         },
-        set(value){}
+        set(value) {},
       },
     },
     methods: {
       setTipTop(value) {
         let headerHeight = this.width < 600 ? 56 : 64;
         this.tipTop = headerHeight + value * (this.height - 80 - headerHeight) / 100;
+      },
+      wheelHander(e) {
+        let oEvent = e || window.event;
+        //非火狐
+        if (oEvent.wheelDelta) {
+          //向上滚动
+          if (oEvent.wheelDelta > 0) {
+            this.$emit('prev')
+          } else {//向下滚动
+            this.$emit('next');
+          }
+        } else if (oEvent.detail) {
+          //向下滚动
+          if (oEvent.detail > 0) {
+            this.$emit('next');
+          } else {//向上滚动
+            this.$emit('prev');
+          }
+        }
       },
       init() {
         let slider = document.getElementById('sliderBtn');
@@ -88,6 +107,8 @@
             this.moveStatus = false;
           }
         });
+        document.onmousewheel = this.wheelHander;//非火狐
+        document.addEventListener('DOMMouseScroll', this.wheelHander, false);//火狐
       },
     },
     mounted() {

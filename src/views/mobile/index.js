@@ -57,6 +57,7 @@ export default {
       toolTipsLeft: 0,
       selectedInfo: {},
       selectedCfi: null,
+      selectedLocation: null,
       selectedColorClassName: null,
       currentHandleWord: null,
       currentHandleAnnotateWrod: null,
@@ -72,7 +73,7 @@ export default {
       imgSrc: null,
       messageStatus: false,
       messageContent: null,
-      surplusTop: 0,
+      surplusTop: 21,
       menuDialogStatus: false,
       mouseSelectStatus: false,
     };
@@ -129,6 +130,7 @@ export default {
         // 进度条初始化
         this.progress = 0;
         this.locations = this.bookRendition.currentLocation();
+        this.currentChapter = this.locations.start;
         this.chapterDetailList = [];
         let index = 1;
         this.book.navigation.toc.map(item => {
@@ -155,12 +157,20 @@ export default {
         // 章节变化
         this.bookRendition.on('rendered', (section) => {
           console.log('章节变化');
-          let current = this.chapterDetailList.filter(val => {
+          this.bookInfo.totalPage = this.chapterDetailList.slice(-1)[0]
+              ? this.chapterDetailList.slice(-1)[0].index
+              : 0;
+          let current = this.chapterDetailList.filter((val, ind) => {
             return val.href === section.href || val.fristChapterHref ===
                 section.href;
           })[0];
-          this.currentChapter = section;
           if (current) {
+            let obj = {
+              ...section
+            }
+            obj.index = current.index;
+            this.currentChapter = obj;
+            this.bookInfo.currentPage = current.index;
             this.bookInfo.currentChapter = current.parentChapterLabel
                 ? (current.parentChapterLabel + ' - ' + current.label)
                 : current.label;
@@ -171,16 +181,6 @@ export default {
         this.bookRendition.on('relocated', location => {
           console.log('页码变化');
           this.locations = location;
-          this.bookInfo.totalPage = this.chapterDetailList.slice(-1)[0]
-              ? this.chapterDetailList.slice(-1)[0].index
-              : 0;
-          let currentPage = this.chapterDetailList.filter((val, ind) => {
-            return val.href === this.locations.start.href ||
-                val.fristChapterHref ===
-                this.locations.start.href || val.href.split('#')[0] ===
-                this.locations.start.href;
-          })[0];
-          this.bookInfo.currentPage = currentPage && currentPage.index;
           this.progress = location.start && location.start.percentage * 100;
           this.nextStatus = location.atEnd ? false : true;
           this.prevStatus = location.atStart ? false : true;
@@ -198,9 +198,11 @@ export default {
         this.bookRendition.on('selected', (cfiRange, contents) => {
           let range, rangeObj, fs = parseInt(getLS('fontSize')),
               lh = parseInt(getLS('lineHeight') * 10) / 10;
-          range = contents.range(cfiRange);
+          range = this.bookRendition.getRange(cfiRange);
           rangeObj = range.getBoundingClientRect();
+          this.mouseSelectStatus = true;
           this.selectedCfi = cfiRange;
+          this.selectedLocation = this.book.locations.locationFromCfi(cfiRange);
           this.selectedInfo = rangeObj;
           this.toolTipsTop = rangeObj.top + this.bookFrame.top - 90 - 0.5 * fs *
               lh - 10 - this.surplusTop;
@@ -263,6 +265,7 @@ export default {
           range = this.bookRendition.getRange(cfiRange);
           rangeObj = range.getBoundingClientRect();
           this.selectedCfi = cfiRange;
+          this.selectedLocation = this.book.locations.locationFromCfi(cfiRange);
           this.selectedInfo = rangeObj;
           this.selectedColorClassName = object && object.className;
           this.currentHandleAnnotateWrod = object.annotation
@@ -325,6 +328,7 @@ export default {
         id: this.id + new Date().getTime(),
         bookId: this.id,
         cfi: this.selectedCfi,
+        location: this.selectedLocation,
         word: this.currentHandleWord,
         index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
         type: 'underline',  // 'underline', 'annotation'
@@ -353,6 +357,7 @@ export default {
         id: this.id + new Date().getTime(),
         bookId: this.id,
         cfi: this.selectedCfi,
+        location: this.selectedLocation,
         word: this.currentHandleWord,
         index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
         type: this.currentHandleAnnotateWrod ? 'annotation' : 'underline',  // 'underline', 'annotation'
@@ -399,14 +404,23 @@ export default {
       }
       if ((top + 270) > document.body.clientHeight) {
         this.annotateShowAtTheBottom = false;
-        this.annotateTop = top - 270 - this.selectedInfo.height - 20;
+        if (this.selectedInfo.height + this.bookFrame.bottom + 270 >
+            document.body.clientHeight) {
+          this.annotateTop = document.body.clientHeight - 270;
+          this.annotateLeft = document.body.clientWidth - 500 - 41;
+        } else {
+          this.annotateTop = top - 270 - this.selectedInfo.height - 20;
+          this.annotateLeft = (this.selectedInfo.left - left) %
+              this.bookFrame.width + this.bookFrame.left +
+              this.selectedInfo.width / 2 - 250;
+        }
       } else {
         this.annotateShowAtTheBottom = true;
         this.annotateTop = top;
+        this.annotateLeft = (this.selectedInfo.left - left) %
+            this.bookFrame.width + this.bookFrame.left +
+            this.selectedInfo.width / 2 - 250;
       }
-      this.annotateLeft = (this.selectedInfo.left - left) %
-          this.bookFrame.width + this.bookFrame.left +
-          this.selectedInfo.width / 2 - 250;
       this.annotateStatus = true;
       this.annotateWord = this.currentHandleAnnotateWrod;
     },
@@ -434,52 +448,80 @@ export default {
         this.message('批注内容不能为空!');
         this.closeAnnotateDialog();
         return true;
-      }
-      this.bookRendition.annotations.remove(this.selectedCfi, 'underline');
-      removeNote(this.id, this.selectedCfi);
-      this.bookRendition.annotations.add('underline', this.selectedCfi, {
-        cfiRange: this.selectedCfi,
-        className: this.selectedColorClassName
-            ? this.selectedColorClassName
-            : 'default',
-        annotation: this.annotateWord,
-      }, () => {}, 'default', {});
-      setNote(this.id, {
-        id: this.id + new Date().getTime(),
-        bookId: this.id,
-        cfi: this.selectedCfi,
-        word: this.currentHandleWord,
-        index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
-        type: 'annotation',  // 'underline', 'annotation'
-        underlineClass: this.selectedColorClassName
-            ? this.selectedColorClassName
-            : 'default',
-        annotation: this.annotateWord,
-        createTime: new Date().getTime(),
-      });
-      let isExistence = this.noteTipsList.some(val => {
-        return val.cfi === this.selectedCfi;
-      });
-      if (isExistence) {
-        this.noteTipsList.map(item => {
-          if (item.cfi === this.selectedCfi) {
-            item.annotation = this.annotateWord;
-          }
-          return item;
+      } else if(this.annotateWord === '' && this.toolTipsMode){
+        this.noteTipsList = this.noteTipsList.filter(val => {
+          return !(val.cfi === this.selectedCfi);
         });
-      } else {
-        this.noteTipsList.push({
+        setNote(this.id, {
           id: this.id + new Date().getTime(),
           bookId: this.id,
           cfi: this.selectedCfi,
+          location: this.selectedLocation,
           word: this.currentHandleWord,
+          index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+          type: 'underline',  // 'underline', 'annotation'
+          underlineClass: this.selectedColorClassName
+              ? this.selectedColorClassName
+              : 'default',
+          annotation: null,
+          createTime: new Date().getTime(),
+        });
+      } else {
+        this.bookRendition.annotations.remove(this.selectedCfi, 'underline');
+        removeNote(this.id, this.selectedCfi);
+        this.bookRendition.annotations.add('underline', this.selectedCfi, {
+          cfiRange: this.selectedCfi,
+          className: this.selectedColorClassName
+              ? this.selectedColorClassName
+              : 'default',
+          annotation: this.annotateWord,
+        }, () => {}, this.selectedColorClassName
+            ? this.selectedColorClassName
+            : 'default', {});
+        setNote(this.id, {
+          id: this.id + new Date().getTime(),
+          bookId: this.id,
+          cfi: this.selectedCfi,
+          location: this.selectedLocation,
+          word: this.currentHandleWord,
+          index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
           type: 'annotation',  // 'underline', 'annotation'
-          underlineClass: 'default',
+          underlineClass: this.selectedColorClassName
+              ? this.selectedColorClassName
+              : 'default',
           annotation: this.annotateWord,
           createTime: new Date().getTime(),
-          isShowed: false,
-          ...this.getNoteTipsPosition(this.selectedCfi),
         });
+        let isExistence = this.noteTipsList.some(val => {
+          return val.cfi === this.selectedCfi;
+        });
+        if (isExistence) {
+          this.noteTipsList.map(item => {
+            if (item.cfi === this.selectedCfi) {
+              item.annotation = this.annotateWord;
+              item.underlineClass = this.selectedColorClassName
+                  ? this.selectedColorClassName
+                  : 'default';
+            }
+            return item;
+          });
+        } else {
+          this.noteTipsList.push({
+            id: this.id + new Date().getTime(),
+            bookId: this.id,
+            cfi: this.selectedCfi,
+            location: this.selectedLocation,
+            word: this.currentHandleWord,
+            type: 'annotation',  // 'underline', 'annotation'
+            underlineClass: this.selectedColorClassName
+                ? this.selectedColorClassName
+                : 'default',
+            annotation: this.annotateWord,
+            createTime: new Date().getTime(),
+            isShowed: false,
+            ...this.getNoteTipsPosition(this.selectedCfi),
+          });
+        }
       }
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
@@ -492,7 +534,7 @@ export default {
       let left, top, range, otherRange, rangeObj, otherRangeObj,
           fs = parseInt(getLS('fontSize')),
           lh = parseInt(getLS('lineHeight') * 10) / 10;
-      range = this.bookRendition.getRange(cfi);
+      range = this.getRange(cfi);
       if ( !range) {
         return true;
       }
@@ -511,25 +553,27 @@ export default {
           if (Math.abs(otherRangeObj.left % this.bookFrame.width - 0.04 *
               this.bookFrame.width) < 10) {
             top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
-                this.surplusTop;
-            ;
+                this.surplusTop + rangeObj.height - fs * lh - 2;
             left = left + 0.92 * this.bookFrame.width - 5;
           } else {
             top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
-                this.surplusTop;
-            ;
+                this.surplusTop + rangeObj.height - fs * lh - 2;
             left = left - 0.08 * this.bookFrame.width - 3;
           }
         } else {
-          top = top - fs * lh - this.surplusTop;
-          ;
+          top = top - fs * lh;
           left = left + 0.42 * this.bookFrame.width - 3;
         }
       }
-      // this.top = top
-      // this.left = left
+      let extraTop, extraLeft;
+      if (getLS('fontFamily') === 'MicrosoftYaHei' || getLS('fontFamily') ===
+          'PingFang SC, PingFang TC') {
+        extraTop = 0;
+      } else {
+        extraTop = -5;
+      }
       return {
-        top: top,
+        top: top + extraTop,
         left: left,
       };
     },
@@ -550,17 +594,36 @@ export default {
     bookmarksChange() {
       this.bookmarksStatus = false;
       this.bookmarksId = null;
-      let startLocations = this.book.locations.locationFromCfi(
-          this.locations.start.cfi);
-      let endLocations = this.book.locations.locationFromCfi(
-          this.locations.end.cfi);
-      this.bookmarksStatus = getBookmarks(this.id).some(val => {
-        let resultLocations = this.book.locations.locationFromCfi(
-            val.startCfi);
-        if (resultLocations >= startLocations && resultLocations <
-            endLocations && resultLocations <
-            ((endLocations + startLocations) / 2)) {
-          this.bookmarksId = val.id;
+      let baseCfi = this.locations.end.cfi.split('!');
+      let cfi = baseCfi[0] + '!/' + baseCfi[1].split('/')[1] + '/' +
+          baseCfi[1].split('/')[2] + ',/1:0,/1:1)';
+      if ( !this.getRangeRect(cfi)) {
+        return true;
+      }
+      let minLeft, maxLeft, endCfiObj = this.getRangeRect(cfi);
+      if (this.singlePageStatus) {
+        minLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize'));
+        maxLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize')) + 0.92 *
+            this.bookFrame.width;
+      } else {
+        minLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize')) - 0.5 *
+            this.bookFrame.width;
+        maxLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize')) + 0.42 *
+            this.bookFrame.width;
+      }
+      this.bookmarksStatus = getBookmarks(this.id).some(item => {
+        if ( !this.getRangeRect(item.startCfi)) {
+          return false;
+        }
+        let rangeObj = this.getRangeRect(item.startCfi);
+        let left = rangeObj.left;
+        let startLocation = this.book.locations.locationFromCfi(
+            this.locations.start.cfi);
+        let endLocation = this.book.locations.locationFromCfi(
+            this.locations.end.cfi);
+        if (left >= minLeft && left <= maxLeft && item.location >=
+            startLocation && item.location <= endLocation) {
+          this.bookmarksId = item.id;
           return true;
         } else {
           return false;
@@ -574,21 +637,37 @@ export default {
       noteList.map(item => {
         this.bookRendition.annotations.remove(item.cfi, 'underline');
       });
-      let startLocations = this.book.locations.locationFromCfi(
-          this.locations.start.cfi);
-      let endLocations = this.book.locations.locationFromCfi(
-          this.locations.end.cfi);
-      this.toolTipsList = [];
+      let baseCfi = this.locations.end.cfi.split('!');
+      let endCfi = baseCfi[0] + '!/' + baseCfi[1].split('/')[1] + '/' +
+          baseCfi[1].split('/')[2] + ',/1:0,/1:1)';
+      if ( !this.getRangeRect(endCfi)) {
+        return true;
+      }
+      let minLeft, maxLeft, endCfiObj = this.getRangeRect(endCfi);
+      if (this.singlePageStatus) {
+        minLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize'));
+        maxLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize')) + 0.92 *
+            this.bookFrame.width;
+      } else {
+        minLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize')) - 0.5 *
+            this.bookFrame.width;
+        maxLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize')) + 0.42 *
+            this.bookFrame.width;
+      }
       this.noteTipsList = [];
+      this.toolTipsList = [];
       noteList.map((item, index, arr) => {
-        let noteStatus = arr.some(val => {
-          let resultLocations = this.book.locations.locationFromCfi(
-              val.cfi);
-          return resultLocations >= startLocations && resultLocations <
-              endLocations && resultLocations >
-              ((endLocations + startLocations) / 2);
-        });
-        if (noteStatus) {
+        if ( !this.getRangeRect(item.cfi)) {
+          return false;
+        }
+        let rangeObj = this.getRangeRect(item.cfi);
+        let left = rangeObj.left;
+        let startLocation = this.book.locations.locationFromCfi(
+            this.locations.start.cfi);
+        let endLocation = this.book.locations.locationFromCfi(
+            this.locations.end.cfi);
+        if (left >= minLeft && left <= maxLeft && item.location >=
+            startLocation && item.location <= endLocation) {
           this.toolTipsList.push(item.cfi);
           this.bookRendition.annotations.add('underline', item.cfi, {
             cfiRange: item.cfi,
@@ -602,6 +681,8 @@ export default {
               ...item,
             });
           }
+        }else{
+          return item
         }
       });
     },
@@ -639,6 +720,9 @@ export default {
     setFont(value) {
       this.themes.font(value);
       setLS('fontFamily', value);
+      this.bookmarksChange();
+      this.noteChange();
+      this.bookRendition.display(this.locations.start.cfi);
     },
     setFontSize(value) {
       this.themes.fontSize(value + 'px');
@@ -651,7 +735,6 @@ export default {
       this.registerTheme(value);
       this.themes.select(bg);
       setLS('lineHeight', value);
-      // console.log(this.locations)
       this.bookmarksChange();
       this.noteChange();
       this.bookRendition.display(this.locations.start.cfi);
@@ -708,7 +791,6 @@ export default {
       const location = progress > 0 ? this.book.locations.cfiFromPercentage(
           percentage) : 0;
       this.bookRendition.display(location);
-      // this.bookInfo.currentPage = this.book.locations.locationFromCfi(location);
     },
     prev() {
       if (this.book.package.metadata.direction === 'rtl') {
@@ -755,15 +837,17 @@ export default {
       } else {
         let objStart = this.locations && this.locations.start;
         let objEnd = this.locations && this.locations.end;
-        let content = this.bookRendition.getRange(objStart.cfi) &&
-            this.bookRendition.getRange(objStart.cfi).commonAncestorContainer;
+        let content = this.getRange(objStart.cfi) && this.getRange(objStart.cfi).commonAncestorContainer;
         let word = content && content.data;
         let isSign = word.split(' ').some(val => val === '\n');
+        let baseUrl = objStart.cfi.split('!')[0];
+        let detailUrl = objStart.cfi.split('!')[1].split('/');
         if ( !isSign) {
           setBookmarks(this.id, {
             id: this.id + new Date().getTime(),
             bookId: this.id,
             startCfi: objStart.cfi,
+            location: objStart.location,
             endCfi: objEnd.cfi,
             href: objStart.href,
             word: word,
@@ -820,7 +904,7 @@ export default {
     },
     // 设置单/双页模式
     setPageType() {
-      let width = document.body.clientWidth;
+      let cfi = this.locations.start.cfi
       this.screenIsChange = true;
       this.singlePageStatus = !this.singlePageStatus;
       this.surplusTop = 21;
@@ -832,7 +916,7 @@ export default {
         } else {
           this.bookRendition.resize(630);
         }
-        this.bookRendition.display(this.locations.start.cfi);
+        this.bookRendition.display(cfi)
         this.toolTipsStatus = false;
         this.annotateStatus = false;
       }, 100);
@@ -898,6 +982,31 @@ export default {
         this.messageStatus = false;
         this.messageContent = null;
       }, 3000);
+    },
+    getRange(cfi) {
+      let range;
+      if (this.bookRendition.getRange(cfi)) {
+        range = this.bookRendition.getRange(cfi)
+        return range;
+      } else if (this.bookRendition.getContents()[0].range(cfi)) {
+        range = this.bookRendition.getContents()[0].range(cfi);
+        return range;
+      }else{
+        return false
+      }
+    },
+    // 获取矩形对象
+    getRangeRect(cfi) {
+      let range;
+      if (this.bookRendition.getRange(cfi)) {
+        range = this.bookRendition.getRange(cfi)
+        return range && range.getBoundingClientRect();
+      } else if (this.bookRendition.getContents()[0].range(cfi)) {
+        range = this.bookRendition.getContents()[0].range(cfi);
+        return range && range.getBoundingClientRect();
+      }else{
+        return false
+      }
     },
   },
 };

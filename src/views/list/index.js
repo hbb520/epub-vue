@@ -42,7 +42,8 @@ export default {
                   }
                   return item
                 })
-              });
+                book.destroy()
+              })
             });
           }
         }
@@ -65,7 +66,6 @@ export default {
       });
     },
     uploading(event, file, fileList) {
-      this.isUploading = true;
       this.progress = parseInt(file.percentage);
     },
     bookHandleChange(file, fileList) {
@@ -82,6 +82,7 @@ export default {
     beforeBookUpload(file) {
       if (file && file.type === 'application/epub+zip') {
         this.uploadData.cmfile = file;
+        this.isUploading = true;
         return true;
       } else {
         this.$message.error('上传的图书必须为epub格式!');

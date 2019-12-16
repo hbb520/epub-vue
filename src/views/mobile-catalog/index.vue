@@ -9,7 +9,7 @@
 		<div class="catalog-container" v-if="menu === 1">
 			<div class="list">
 				<div v-for="(item, index) in chapterList" :key="index"
-				     :class="(currentChapter.href && (item.href === currentChapter.href || item.fristChapterHref === currentChapter.href || item.href === (currentChapter.href ? currentChapter.href.split('#')[0] : null))) ? (item.isUnit ? 'chapter active unit clearfix' : 'chapter active clearfix' ) : (item.isUnit ? 'chapter unit clearfix' : 'chapter clearfix' )">
+				     :class="(currentChapter.index && item.index === currentChapter.index) ? (item.isUnit ? 'chapter active unit clearfix' : 'chapter active clearfix' ) : (item.isUnit ? 'chapter unit clearfix' : 'chapter clearfix' )">
 					<p class="wordOverflow" @click="goToChapter(item)">{{ item.label }}</p>
 					<span>{{item.index}}</span>
 				</div>

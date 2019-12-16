@@ -5,7 +5,7 @@
 				<mu-appbar style="width: 100%;" color="primary"
 				           :class="bookmarksStatus ? 'otherHeader appbar-header' : 'appbar-header'">
 					<!--      <div style="max-width: 1540px;margin: 0 auto">-->
-					<mu-button icon slot="left" @click="$goLink('/list')">
+					<mu-button icon slot="left" @click="book.destroy();$goLink('/list')">
 						<img src="../../assets/imgs/return.png" alt="" style="width: 30px;">
 					</mu-button>
 					<mu-button flat slot="right" @click="menu_click">
@@ -39,7 +39,7 @@
 					<span>当前位置：</span>
 					<span @click="$goLink('/list')">首页</span>
 					<span v-if="bookInfo.title">></span>
-					<span v-if="bookInfo.title">{{ bookInfo.title }}</span>
+					<span v-if="bookInfo.title" class="wordOverflow" style="width: 80%">{{ bookInfo.title }}</span>
 				</div>
 				<div class="book-container clearfix">
 					<div :class="singlePageStatus ? ('bookBox singlePage ' + theme) : ('bookBox ' + theme)">
@@ -47,7 +47,7 @@
 							<i class="iconfont iconleft"></i>
 						</div>
 						<div class="top clearfix">
-							<span>{{ bookInfo.title }}</span>
+							<span class="wordOverflow" style="width: 50%">{{ bookInfo.title }}</span>
 							<i class="iconfont iconsign" v-if="bookmarksStatus"></i>
 							<span class="wordOverflow">{{ bookInfo.currentChapter }}</span>
 						</div>
@@ -55,10 +55,10 @@
 						     element-loading-spinner="el-icon-loading"
 						     element-loading-background="rgba(0, 0, 0, 0.6)"></div>
 						<div class="bottom">
-						<span v-if="bookInfo.currentPage && bookInfo.totalPage && !singlePageStatus">
-							{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
+							<span v-if="bookInfo.currentPage && bookInfo.totalPage && !singlePageStatus">
+								{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
 							<span v-if="bookInfo.currentPage && bookInfo.totalPage">
-							{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
+								{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
 						</div>
 						<div class="next" @click="next" v-if="nextStatus">
 							<i class="iconfont iconright"></i>
@@ -70,7 +70,8 @@
 			</div>
 
 			<progress-slider v-if="progress !== null" :progress.sync="progress" :tips="progressTips"
-			                 @change="onProgressChange"></progress-slider>
+			                 @change="onProgressChange" @prev="!drawer_open && prev()"
+			                 @next="!drawer_open && next()"></progress-slider>
 			<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container"
 			           @close="dialogHandle">
 				<catalog v-if="catalogStatus" :id="id" :chapterList="chapterDetailList"

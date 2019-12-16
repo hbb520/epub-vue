@@ -4,7 +4,7 @@
 			<mu-appbar style="width: 100%;" color="primary" v-if="menuDialogStatus"
 			           :class="bookmarksStatus ? 'otherHeader appbar-header' : 'appbar-header'">
 				<!--      <div style="max-width: 1540px;margin: 0 auto">-->
-				<mu-button icon slot="left" @click="$goLink('/list')">
+				<mu-button icon slot="left" @click="book.destroy();$goLink('/list')">
 					<img src="../../assets/imgs/return.png" alt="" style="width: 30px;">
 				</mu-button>
 				<mu-button flat slot="right" @click="menu_click">
@@ -27,12 +27,14 @@
 		     element-loading-background="rgba(0, 0, 0, 0.6)">
 			<div :class="'bookBox ' + theme">
 				<div class="top clearfix">
-					<span>{{ bookInfo.currentChapter }}</span>
+					<span class="wordOverflow" style="width: 80%">{{ bookInfo.currentChapter }}</span>
+					<i class="iconfont iconsign" v-if="bookmarksStatus"></i>
 				</div>
 				<div id="book"></div>
 				<div class="bottom">
-          <span v-if="bookInfo.currentPage && bookInfo.totalPage">
-            {{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
+                    <span v-if="bookInfo.currentPage && bookInfo.totalPage">
+	                    {{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}
+                    </span>
 				</div>
 			</div>
 		</div>

@@ -22,6 +22,7 @@ export function removeToken() {
 //   "startCfi": String,
 //   "endCfi": String,
 //   "href": String,
+//   "location": Number,
 //   "word": String,
 //   "index": Number,
 //   "createTime": Date,
@@ -80,6 +81,7 @@ export function removeBookmarks(id, value) {
 //   "cfi": String,
 //   "word": String,
 //   "index": Number,
+//   "location": Number,
 //   "type": String,  // 'underline', 'annotation'
 //   "underlineClass": String,
 //   "annotation": String,
