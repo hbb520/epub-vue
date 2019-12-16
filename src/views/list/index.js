@@ -14,6 +14,8 @@ export default {
       progress: 0,
       isUploading: false,
       isPhoneClient: false,
+      dialogStatus: false,
+      dialogId: null,
     };
   },
   created() {
@@ -26,24 +28,26 @@ export default {
       getList().then(res => {
         if (res && res.data && Array.isArray(res.data)) {
           for (let i = 0; i < res.data.length; i++) {
-            let book = ePub('http://huake.qanzone.com:8094/' + res.data[i].path);
+            let book = ePub(
+                'http://huake.qanzone.com:8094/' + res.data[i].path);
+            let name = res.data[i].name.toLowerCase();
             this.bookList.push({
               id: res.data[i].id,
-              title: res.data[i].name,
+              title: name ? name.split('.epub')[0] : null,
               path: res.data[i].path,
               cover: null,
             });
             book.ready.then((arr) => {
               book.archive.getBase64(book.cover).then(url => {
-                this.bookList.map( item => {
-                  if(item.id === res.data[i].id) {
-                    item.title = arr[2].title
-                    item.cover = url
+                this.bookList.map(item => {
+                  if (item.id === res.data[i].id) {
+                    item.title = arr[2].title;
+                    item.cover = url;
                   }
-                  return item
-                })
-                book.destroy()
-              })
+                  return item;
+                });
+                book.destroy();
+              });
             });
           }
         }
@@ -55,7 +59,38 @@ export default {
       const params = {
         'bookId': id,
       };
+      if ( !this.isPhoneClient) {
+        this.$confirm('此操作将删除该图书, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }).then(() => {
+          delBook(params).then(res => {
+            this.$message({
+              type: 'success',
+              message: '删除成功!',
+            });
+            this.getBookList();
+          }, error => {
+            this.$message.error(error);
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除',
+          });
+        });
+      } else {
+        this.dialogStatus = true
+        this.dialogId = id
+      }
+    },
+    agree() {
+      const params = {
+        'bookId': this.dialogId,
+      };
       delBook(params).then(res => {
+        this.dialogStatus = false
         this.$message({
           type: 'success',
           message: '删除成功!',

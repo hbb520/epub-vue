@@ -70,8 +70,8 @@
 			</div>
 
 			<progress-slider v-if="progress !== null" :progress.sync="progress" :tips="progressTips"
-			                 @change="onProgressChange" @prev="!drawer_open && prev()"
-			                 @next="!drawer_open && next()"></progress-slider>
+			                 @change="onProgressChange" @prev="(!drawer_open && !imgDialogStatus) && prev()"
+			                 @next="(!drawer_open && !imgDialogStatus) && next()"></progress-slider>
 			<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container"
 			           @close="dialogHandle">
 				<catalog v-if="catalogStatus" :id="id" :chapterList="chapterDetailList"
