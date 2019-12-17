@@ -135,6 +135,7 @@ export default {
         this.currentChapter = this.locations.start;
         this.chapterDetailList = [];
         let index = 1;
+        this.getPage();
         this.book.navigation.toc.map(item => {
           this.chapterDetailList.push({
             index: index,
@@ -437,7 +438,7 @@ export default {
         this.message('批注内容不能为空!');
         this.closeAnnotateDialog();
         return true;
-      } else if(this.annotateWord === '' && this.toolTipsMode){
+      } else if (this.annotateWord === '' && this.toolTipsMode) {
         this.noteTipsList = this.noteTipsList.filter(val => {
           return !(val.cfi === this.selectedCfi);
         });
@@ -597,9 +598,10 @@ export default {
     bookmarksChange() {
       this.bookmarksStatus = false;
       this.bookmarksId = null;
-      let baseCfi = this.locations.end.cfi.split('!');
-      let cfi = baseCfi[0] + '!/' + baseCfi[1].split('/')[1] + '/' +
-          baseCfi[1].split('/')[2] + ',/1:0,/1:1)';
+      // let baseCfi = this.locations.end.cfi.split('!');
+      // let cfi = baseCfi[0] + '!/' + baseCfi[1].split('/')[1] + '/' +
+      //     baseCfi[1].split('/')[2] + ',/1:0,/1:1)';
+      let cfi = this.locations.end.cfi.split('/1:')[0] + ',/1:0,/1:1)';
       if ( !this.getRangeRect(cfi)) {
         return true;
       }
@@ -640,9 +642,10 @@ export default {
       noteList.map(item => {
         this.bookRendition.annotations.remove(item.cfi, 'underline');
       });
-      let baseCfi = this.locations.end.cfi.split('!');
-      let endCfi = baseCfi[0] + '!/' + baseCfi[1].split('/')[1] + '/' +
-          baseCfi[1].split('/')[2] + ',/1:0,/1:1)';
+      // let baseCfi = this.locations.end.cfi.split('!');
+      // let endCfi = baseCfi[0] + '!/' + baseCfi[1].split('/')[1] + '/' +
+      //     baseCfi[1].split('/')[2] + ',/1:0,/1:1)';
+      let endCfi = this.locations.end.cfi.split('/1:')[0] + ',/1:0,/1:1)';
       if ( !this.getRangeRect(endCfi)) {
         return true;
       }
@@ -876,11 +879,11 @@ export default {
       let book = this.book;
       Promise.all(book.spine.spineItems.map(item => {
             return new Promise((resolve, reject) => {
-              item.load(book.load.bind(book)).then(result => {
-                resolve(item.find.bind(item, value));
-              }).catch(results => {
-                item.unload.bind(item);
-              });
+              // item.load(book.load.bind(book)).then(result => {
+              resolve(item.find.bind(item, value));
+              // }).catch(results => {
+              //   item.unload.bind(item);
+              // });
             });
           }),
       ).then(results => {
@@ -894,9 +897,13 @@ export default {
         });
       });
     },
+    // 获取页码
+    getPage() {
+
+    },
     // 设置单/双页模式
     setPageType() {
-      let cfi = this.locations.start.cfi
+      let cfi = this.locations.start.cfi;
       this.screenIsChange = true;
       this.singlePageStatus = !this.singlePageStatus;
       this.surplusTop = 21;
@@ -908,7 +915,7 @@ export default {
         } else {
           this.bookRendition.resize(630);
         }
-        this.bookRendition.display(cfi)
+        this.bookRendition.display(cfi);
         this.toolTipsStatus = false;
         this.annotateStatus = false;
       }, 100);
@@ -991,9 +998,9 @@ export default {
       if (this.bookRendition.getRange(cfi)) {
         range = this.bookRendition.getRange(cfi);
         return range;
-      } else if (this.bookRendition.getContents()[0].range(cfi)) {
-        range = this.bookRendition.getContents()[0].range(cfi);
-        return range;
+        // } else if (this.bookRendition.getContents()[0].range(cfi)) {
+        //   range = this.bookRendition.getContents()[0].range(cfi);
+        //   return range;
       } else {
         return false;
       }
@@ -1004,9 +1011,9 @@ export default {
       if (this.bookRendition.getRange(cfi)) {
         range = this.bookRendition.getRange(cfi);
         return range && range.getBoundingClientRect();
-      } else if (this.bookRendition.getContents()[0].range(cfi)) {
-        range = this.bookRendition.getContents()[0].range(cfi);
-        return range && range.getBoundingClientRect();
+        // } else if (this.bookRendition.getContents()[0].range(cfi)) {
+        //   range = this.bookRendition.getContents()[0].range(cfi);
+        //   return range && range.getBoundingClientRect();
       } else {
         return false;
       }
