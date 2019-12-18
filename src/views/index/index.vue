@@ -39,7 +39,11 @@
 					<span>当前位置：</span>
 					<span @click="$goLink('/list')">首页</span>
 					<span v-if="bookInfo.title">></span>
-					<span v-if="bookInfo.title" class="wordOverflow" style="width: 80%">{{ bookInfo.title }}</span>
+					<span v-if="bookInfo.title" class="wordOverflow" style="width: 50%">{{ bookInfo.title }}</span>
+					<p v-if="this.showLoadingTip">
+						<i class="el-icon-loading"></i>
+						功能加载中...
+					</p>
 				</div>
 				<div class="book-container clearfix">
 					<div :class="singlePageStatus ? ('bookBox singlePage ' + theme) : ('bookBox ' + theme)">
@@ -55,10 +59,10 @@
 						     element-loading-spinner="el-icon-loading"
 						     element-loading-background="rgba(0, 0, 0, 0.6)"></div>
 						<div class="bottom">
-							<span v-if="bookInfo.currentPage && bookInfo.totalPage && !singlePageStatus">
-								{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
-							<span v-if="bookInfo.currentPage && bookInfo.totalPage">
-								{{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}</span>
+							<span v-if="bookInfo.currentStartPage && bookInfo.totalPage && !singlePageStatus">
+								{{this.bookInfo.currentStartPage}}/{{this.bookInfo.totalPage}}</span>
+							<span v-if="bookInfo.currentEndPage && bookInfo.totalPage">
+								{{this.bookInfo.currentEndPage}}/{{this.bookInfo.totalPage}}</span>
 						</div>
 						<div class="next" @click="next" v-if="nextStatus">
 							<i class="iconfont iconright"></i>
@@ -74,7 +78,7 @@
 			                 @next="(!drawer_open && !imgDialogStatus) && next()"></progress-slider>
 			<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container"
 			           @close="dialogHandle">
-				<catalog v-if="catalogStatus" :id="id" :chapterList="chapterDetailList"
+				<catalog v-if="catalogStatus" :id="id" :book='book' :chapterList="chapterDetailList"
 				         :currentChapter="currentChapter"
 				         @closeDialog="dialogHandle" @goToChapter="goToChapter"
 				         @gotoBookmarks="gotoBookmarks" @gotoNote="gotoBookmarks"
@@ -115,7 +119,6 @@
 				<p class="complete" @click="createAnnotate()">完 成</p>
 			</div>
 			<div id="noteTipsList">
-				<!--			noteTipsList-->
 				<div id="noteTips" v-for="(item, index) in noteTipsList" :key="index"
 				     :class="item.underlineClass" :style="{'top': item.top + 'px','left': item.left + 'px'}">
 					<div class="clearfix" @click="item.isShowed = !item.isShowed; annotateStatus = false;

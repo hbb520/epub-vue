@@ -32,6 +32,10 @@
 				</div>
 				<div id="book"></div>
 				<div class="bottom">
+					<p v-if="this.showLoadingTip">
+						<i class="el-icon-loading"></i>
+						功能加载中...
+					</p>
                     <span v-if="bookInfo.currentPage && bookInfo.totalPage">
 	                    {{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}
                     </span>

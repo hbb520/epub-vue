@@ -14,6 +14,12 @@ export default {
         return null;
       },
     },
+    book: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
     chapterList: {
       type: Array,
       default: () => {
