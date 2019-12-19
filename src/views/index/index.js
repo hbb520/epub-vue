@@ -107,7 +107,7 @@ export default {
     // 图书解析渲染
     bookInit(url) {
       this.bookLoading = true;
-      this.showLoadingTip = true
+      this.showLoadingTip = true;
       this.book = ePub(url);
       this.bookRendition = this.book.renderTo('book', {
         width: '100%',
@@ -131,7 +131,7 @@ export default {
             (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
         return this.book.locations.generate(pageWordNumber);
       }).then(async result => {
-        this.showLoadingTip = false
+        this.showLoadingTip = false;
         console.log('图书加载完成');
         console.log(this.book);
         this.getBookInfo();
@@ -680,16 +680,37 @@ export default {
         let location = this.book.locations.locationFromCfi(item.cfi);
         let startLocation = this.locations.start.location;
         let endLocation = this.locations.end.location;
-        if (location > startLocation && location < endLocation && left >=
-            minLeft && left <= maxLeft) {
+        let isWithinScope = false;
+        if (left >= minLeft && left <= maxLeft) {
+          isWithinScope = true;
+        }
+        if (location > startLocation && location < endLocation) {
           isHasUnderline = true;
-          isHasAnnotation = true;
-        } else if (location === startLocation && width > paragraphWidth) {
-          isHasUnderline = true;
-          isHasAnnotation = true;
-        } else if (location === endLocation && width > paragraphWidth) {
-          isHasUnderline = true;
-          isHasAnnotation = false;
+          if (left + width <= maxLeft) {
+            isHasAnnotation = true;
+          } else {
+            isHasAnnotation = false;
+          }
+        } else if (location === startLocation) {
+          if ((width <= paragraphWidth && isWithinScope) ||
+              (width > paragraphWidth && !isWithinScope)) {
+            isHasUnderline = true;
+            isHasAnnotation = true;
+          } else {
+            isHasUnderline = false;
+            isHasAnnotation = false;
+          }
+        } else if (location === endLocation) {
+          if (width <= paragraphWidth && isWithinScope) {
+            isHasUnderline = true;
+            isHasAnnotation = true;
+          } else if (width > paragraphWidth && !isWithinScope) {
+            isHasUnderline = true;
+            isHasAnnotation = false;
+          } else {
+            isHasUnderline = false;
+            isHasAnnotation = false;
+          }
         }
         if (isHasUnderline) {
           this.toolTipsList.push(item.cfi);
@@ -1078,7 +1099,7 @@ export default {
     },
     // 当前页面文字的定位范围
     getCurrentPageScope() {
-      let left, minLeft, maxLeft
+      let left, minLeft, maxLeft;
       let startObj = this.bookRendition.getContents()[0].locationOf(
           this.locations.start.cfi);
       let endCfi = this.locations.end.cfi.split('/1:')[0] + ',/1:0,/1:1)';
@@ -1095,9 +1116,10 @@ export default {
         if ( !this.getRangeRect(endCfi)) {
           return true;
         }
-        let endObj = this.getRangeRect(endCfi)
+        let endObj = this.getRangeRect(endCfi);
         minLeft = endObj.left - 2 * parseInt(getLS('fontSize'));
-        maxLeft = endObj.left - 2 * parseInt(getLS('fontSize')) + 0.92 * this.bookFrame.width;
+        maxLeft = endObj.left - 2 * parseInt(getLS('fontSize')) + 0.92 *
+            this.bookFrame.width;
       }
       return {
         minLeft,
