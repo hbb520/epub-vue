@@ -101,7 +101,7 @@
 			<el-input type="textarea" v-model="annotateWord" :rows="5"></el-input>
 			<p class="complete" @click="createAnnotate()">完 成</p>
 		</div>
-		<div id="noteTipsList">
+		<div id="noteTipsList" ref="note">
 			<!--      noteTipsList-->
 			<div id="noteTips" v-for="(item, index) in noteTipsList" :key="index" :class="item.underlineClass"
 			     :style="{'top': item.top + 'px','left': item.left + 'px'}"
@@ -109,7 +109,9 @@
 				<span></span>
 				<span></span>
 				<span></span>
-				<div v-if="item.isShowed"><p class="wordOverflow">{{ item.annotation }}</p></div>
+				<div v-if="item.isShowed" :style="{'top': item.cTop + 'px','left': item.cLeft + 'px'}">
+					<p class="wordOverflow">{{ item.annotation }}</p>
+				</div>
 			</div>
 		</div>
 		<div id="imgDialog" v-if="imgDialogStatus" @click="imgDialogStatus = false">

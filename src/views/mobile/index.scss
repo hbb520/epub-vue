@@ -323,11 +323,13 @@
 	}
 
 	#noteTipsList {
+		pointer-events: none;
 		#noteTips {
 			display: block;
 			width: 20px;
 			height: 20px;
-			position: fixed;
+			//position: fixed;
+			position: absolute;
 			z-index: 1000;
 			cursor: pointer;
 			text-align: center;
@@ -367,15 +369,12 @@
 				}
 			}
 
-			div {
+			div.content {
 				display: block;
 				width: 280px;
 				height: 60px;
 				padding: 14px 15px;
-				position: absolute;
-				top: -70px;
-				left: -140px;
-				right: -140px;
+				position: fixed;
 				margin: auto;
 				background: rgba(255, 231, 195, 1);
 				border: 1px solid rgba(250, 205, 137, 1);

@@ -178,6 +178,7 @@ export default {
         // 章节变化
         this.bookRendition.on('rendered', (section) => {
           console.log('章节变化');
+          this.noteChange(null, section.href);
         });
         // 页码变化
         this.bookRendition.on('relocated', location => {
@@ -189,7 +190,7 @@ export default {
           this.nextStatus = location.atEnd ? false : true;
           this.prevStatus = location.atStart ? false : true;
           let current = this.chapterDetailList.filter((val, ind) => {
-            return val.href === location.start.href;
+            return val.href.split('#')[0] === location.start.href.split('#')[0];
           })[0];
           if (current) {
             let obj = {
@@ -203,7 +204,6 @@ export default {
             this.progressTips = this.bookInfo.currentChapter;
           }
           this.bookmarksChange();
-          this.noteChange();
           this.toolTipsStatus = false;
           this.annotateStatus = false;
           this.clearSelectInfo();
@@ -344,6 +344,7 @@ export default {
         bookId: this.id,
         cfi: this.selectedCfi,
         location: this.selectedLocation,
+        href: this.currentChapter.href,
         word: this.currentHandleWord,
         index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
         type: 'underline',  // 'underline', 'annotation'
@@ -353,6 +354,7 @@ export default {
       });
       this.bookRendition.getContents(
           this.selectedCfi)[0].document.getSelection().empty();
+      this.noteChange()
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -373,6 +375,7 @@ export default {
         bookId: this.id,
         cfi: this.selectedCfi,
         location: this.selectedLocation,
+        href: this.currentChapter.href,
         word: this.currentHandleWord,
         index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
         type: this.currentHandleAnnotateWrod ? 'annotation' : 'underline',  // 'underline', 'annotation'
@@ -386,6 +389,7 @@ export default {
         }
         return val;
       });
+      this.noteChange()
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -399,6 +403,7 @@ export default {
       this.noteTipsList = this.noteTipsList.filter(val => {
         return !(val.cfi === this.selectedCfi);
       });
+      this.noteChange()
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -463,15 +468,13 @@ export default {
         this.message('批注内容不能为空!');
         this.closeAnnotateDialog();
         return true;
-      } else if (this.annotateWord === '' && this.toolTipsMode) {
-        this.noteTipsList = this.noteTipsList.filter(val => {
-          return !(val.cfi === this.selectedCfi);
-        });
+      } else if (this.annotateWord === '' && this.toolTipsMode === 'edit') {
         setNote(this.id, {
           id: this.id + new Date().getTime(),
           bookId: this.id,
           cfi: this.selectedCfi,
           location: this.selectedLocation,
+          href: this.currentChapter.href,
           word: this.currentHandleWord,
           index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
           type: 'underline',  // 'underline', 'annotation'
@@ -481,6 +484,7 @@ export default {
           annotation: null,
           createTime: new Date().getTime(),
         });
+        this.noteChange()
       } else {
         this.bookRendition.annotations.remove(this.selectedCfi, 'underline');
         removeNote(this.id, this.selectedCfi);
@@ -498,6 +502,7 @@ export default {
           bookId: this.id,
           cfi: this.selectedCfi,
           location: this.selectedLocation,
+          href: this.currentChapter.href,
           word: this.currentHandleWord,
           index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
           type: 'annotation',  // 'underline', 'annotation'
@@ -507,36 +512,7 @@ export default {
           annotation: this.annotateWord,
           createTime: new Date().getTime(),
         });
-        let isExistence = this.noteTipsList.some(val => {
-          return val.cfi === this.selectedCfi;
-        });
-        if (isExistence) {
-          this.noteTipsList.map(item => {
-            if (item.cfi === this.selectedCfi) {
-              item.annotation = this.annotateWord;
-              item.underlineClass = this.selectedColorClassName
-                  ? this.selectedColorClassName
-                  : 'default';
-            }
-            return item;
-          });
-        } else {
-          this.noteTipsList.push({
-            id: this.id + new Date().getTime(),
-            bookId: this.id,
-            cfi: this.selectedCfi,
-            location: this.selectedLocation,
-            word: this.currentHandleWord,
-            type: 'annotation',  // 'underline', 'annotation'
-            underlineClass: this.selectedColorClassName
-                ? this.selectedColorClassName
-                : 'default',
-            annotation: this.annotateWord,
-            createTime: new Date().getTime(),
-            isShowed: false,
-            ...this.getNoteTipsPosition(this.selectedCfi),
-          });
-        }
+        this.noteChange()
       }
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
@@ -623,20 +599,15 @@ export default {
     bookmarksChange() {
       this.bookmarksStatus = false;
       this.bookmarksId = null;
-      let cfi = this.locations.end.cfi.split('/1:')[0] + ',/1:0,/1:1)';
-      if ( !this.getRangeRect(cfi)) {
-        return true;
-      }
-      let minLeft, maxLeft, endCfiObj = this.getRangeRect(cfi);
+      let minLeft, maxLeft, page = this.locations.start.displayed.page;
       if (this.singlePageStatus) {
-        minLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize'));
-        maxLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize')) + 0.92 *
+        minLeft = this.bookFrame.width * (page - 1) + 0.04 *
             this.bookFrame.width;
+        maxLeft = minLeft + 0.92 * this.bookFrame.width;
       } else {
-        minLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize')) - 0.5 *
+        minLeft = this.bookFrame.width * (page - 1) / 2 + 0.04 *
             this.bookFrame.width;
-        maxLeft = endCfiObj.left - 2 * parseInt(getLS('fontSize')) + 0.42 *
-            this.bookFrame.width;
+        maxLeft = minLeft + 0.92 * this.bookFrame.width;
       }
       this.bookmarksStatus = getBookmarks(this.id).some(item => {
         if ( !this.getRangeRect(item.startCfi)) {
@@ -657,77 +628,52 @@ export default {
       });
     },
     // 页面变化笔记回显
-    noteChange(cfi) {
+    noteChange(cfi, href) {
       let noteList = getNote(this.id);
-      this.bookRendition.annotations.remove(cfi, 'underline');
+      let cfiHref = href || this.currentChapter.href
+      cfi && this.bookRendition.annotations.remove(cfi, 'underline');
       noteList.map(item => {
         this.bookRendition.annotations.remove(item.cfi, 'underline');
       });
-      let { minLeft, maxLeft } = this.getCurrentPageScope();
       this.noteTipsList = [];
       this.toolTipsList = [];
-      noteList.map((item, index, arr) => {
-        if ( !this.getRangeRect(item.cfi)) {
-          return false;
-        }
-        let isHasUnderline = false, isHasAnnotation = false,
-            rangeObj = this.getRangeRect(item.cfi);
-        let width = rangeObj.width;
-        let left = rangeObj.left;
-        let paragraphWidth = this.singlePageStatus
-            ? this.bookFrame.width
-            : 0.42 * this.bookFrame.width;
-        let location = this.book.locations.locationFromCfi(item.cfi);
-        let startLocation = this.locations.start.location;
-        let endLocation = this.locations.end.location;
-        let isWithinScope = false;
-        if (left >= minLeft && left <= maxLeft) {
-          isWithinScope = true;
-        }
-        if (location > startLocation && location < endLocation) {
-          isHasUnderline = true;
-          if (left + width <= maxLeft) {
-            isHasAnnotation = true;
-          } else {
-            isHasAnnotation = false;
-          }
-        } else if (location === startLocation) {
-          if ((width <= paragraphWidth && isWithinScope) ||
-              (width > paragraphWidth && !isWithinScope)) {
-            isHasUnderline = true;
-            isHasAnnotation = true;
-          } else {
-            isHasUnderline = false;
-            isHasAnnotation = false;
-          }
-        } else if (location === endLocation) {
-          if (width <= paragraphWidth && isWithinScope) {
-            isHasUnderline = true;
-            isHasAnnotation = true;
-          } else if (width > paragraphWidth && !isWithinScope) {
-            isHasUnderline = true;
-            isHasAnnotation = false;
-          } else {
-            isHasUnderline = false;
-            isHasAnnotation = false;
-          }
-        }
-        if (isHasUnderline) {
-          this.toolTipsList.push(item.cfi);
-          this.bookRendition.annotations.add('underline', item.cfi, {
-            cfiRange: item.cfi,
-            className: item.underlineClass,
-            annotation: item.annotation,
-          }, () => {}, item.underlineClass, {});
-        }
-        if (isHasAnnotation && item.type === 'annotation') {
-          this.noteTipsList.push({
-            isShowed: false,
-            ...this.getNoteTipsPosition(item.cfi),
-            ...item,
-          });
-        }
+      noteList.filter((item, index) => {
+        return item.href.split('#')[0] === cfiHref.split('#')[0];
+      }).map((item, index) => {
+        this.toolTipsList.push(item.cfi);
+        this.bookRendition.annotations.add('underline', item.cfi, {
+          cfiRange: item.cfi,
+          className: item.underlineClass,
+          annotation: item.annotation,
+        }, () => {}, item.underlineClass, {});
+        this.createAnnotationDom();
       });
+    },
+    // 创建批注dom
+    createAnnotationDom() {
+      let svg = document.querySelector('svg');
+      let gArr = document.querySelectorAll('svg g');
+      let container = document.querySelector('.epub-view');
+      this.$refs.note.style = svg.style.cssText;
+      getNote(this.id).map((item, index) => {
+        gArr.forEach(val => {
+          if (item.cfi === val.dataset['cfiRange']) {
+            let line = val.querySelectorAll('line')[val.querySelectorAll(
+                'line').length - 1];
+            let left = line.x2.baseVal.value;
+            let top = line.y2.baseVal.value;
+            this.noteTipsList.push({
+              isShowed: false,
+              top: top - 10,
+              left: left,
+              cTop: top - 10 - 70 + this.bookFrame.top,
+              cLeft: left % this.bookFrame.width + this.bookFrame.left - 140 + 10,
+              ...item,
+            });
+          }
+        });
+      });
+      container.appendChild(this.$refs.note);
     },
     // 获取图书信息
     getBookInfo() {
@@ -1096,35 +1042,6 @@ export default {
       } else {
         return false;
       }
-    },
-    // 当前页面文字的定位范围
-    getCurrentPageScope() {
-      let left, minLeft, maxLeft;
-      let startObj = this.bookRendition.getContents()[0].locationOf(
-          this.locations.start.cfi);
-      let endCfi = this.locations.end.cfi.split('/1:')[0] + ',/1:0,/1:1)';
-      if ( !this.singlePageStatus) {
-        if (Math.abs(startObj.left % this.bookFrame.width - 0.04 *
-            this.bookFrame.width) < 10) {
-          left = startObj.left;
-        } else {
-          left = startObj.left + 0.5 * this.bookFrame.width;
-        }
-        minLeft = left;
-        maxLeft = left + 0.92 * this.bookFrame.width;
-      } else {
-        if ( !this.getRangeRect(endCfi)) {
-          return true;
-        }
-        let endObj = this.getRangeRect(endCfi);
-        minLeft = endObj.left - 2 * parseInt(getLS('fontSize'));
-        maxLeft = endObj.left - 2 * parseInt(getLS('fontSize')) + 0.92 *
-            this.bookFrame.width;
-      }
-      return {
-        minLeft,
-        maxLeft,
-      };
     },
   },
 };

@@ -82,6 +82,7 @@ export function removeBookmarks(id, value) {
 //   "word": String,
 //   "index": Number,
 //   "location": Number,
+//   "href": String,
 //   "type": String,  // 'underline', 'annotation'
 //   "underlineClass": String,
 //   "annotation": String,

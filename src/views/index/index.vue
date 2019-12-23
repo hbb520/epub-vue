@@ -57,7 +57,8 @@
 						</div>
 						<div id="book" v-loading="bookLoading" element-loading-text="图书加载中, 请耐心等待..."
 						     element-loading-spinner="el-icon-loading"
-						     element-loading-background="rgba(0, 0, 0, 0.6)"></div>
+						     element-loading-background="rgba(0, 0, 0, 0.6)">
+						</div>
 						<div class="bottom">
 							<span v-if="bookInfo.currentStartPage && bookInfo.totalPage && !singlePageStatus">
 								{{this.bookInfo.currentStartPage}}/{{this.bookInfo.totalPage}}</span>
@@ -118,7 +119,7 @@
 				<el-input type="textarea" v-model="annotateWord" :rows="5"></el-input>
 				<p class="complete" @click="createAnnotate()">完 成</p>
 			</div>
-			<div id="noteTipsList">
+			<div id="noteTipsList" ref="note">
 				<div id="noteTips" v-for="(item, index) in noteTipsList" :key="index"
 				     :class="item.underlineClass" :style="{'top': item.top + 'px','left': item.left + 'px'}">
 					<div class="clearfix" @click="item.isShowed = !item.isShowed; annotateStatus = false;
@@ -127,7 +128,7 @@
 						<span></span>
 						<span></span>
 					</div>
-					<div class="content" v-if="item.isShowed">
+					<div class="content" v-if="item.isShowed" :style="{'top': item.cTop + 'px','left': item.cLeft + 'px'}">
 						<p class="wordOverflow" @click.stop="editAnnotate(item)">{{ item.annotation }}</p>
 					</div>
 				</div>
