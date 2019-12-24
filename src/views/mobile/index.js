@@ -668,7 +668,7 @@ export default {
       this.$refs.note.style = svg.style.cssText;
       getNote(this.id).map((item, index) => {
         gArr.forEach(val => {
-          if (item.cfi === val.dataset['cfiRange']) {
+          if (item.type === 'annotation' && item.cfi === val.dataset['cfiRange']) {
             let line = val.querySelectorAll('line')[val.querySelectorAll(
                 'line').length - 1];
             let left = line.x2.baseVal.value;
