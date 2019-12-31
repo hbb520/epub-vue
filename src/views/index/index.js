@@ -354,7 +354,7 @@ export default {
       });
       this.bookRendition.getContents(
           this.selectedCfi)[0].document.getSelection().empty();
-      this.noteChange()
+      this.noteChange();
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -389,7 +389,7 @@ export default {
         }
         return val;
       });
-      this.noteChange()
+      this.noteChange();
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -403,7 +403,7 @@ export default {
       this.noteTipsList = this.noteTipsList.filter(val => {
         return !(val.cfi === this.selectedCfi);
       });
-      this.noteChange()
+      this.noteChange();
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -484,7 +484,7 @@ export default {
           annotation: null,
           createTime: new Date().getTime(),
         });
-        this.noteChange()
+        this.noteChange();
       } else {
         this.bookRendition.annotations.remove(this.selectedCfi, 'underline');
         removeNote(this.id, this.selectedCfi);
@@ -512,7 +512,7 @@ export default {
           annotation: this.annotateWord,
           createTime: new Date().getTime(),
         });
-        this.noteChange()
+        this.noteChange();
       }
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
@@ -630,7 +630,7 @@ export default {
     // 页面变化笔记回显
     noteChange(cfi, href) {
       let noteList = getNote(this.id);
-      let cfiHref = href || this.currentChapter.href
+      let cfiHref = href || this.currentChapter.href;
       cfi && this.bookRendition.annotations.remove(cfi, 'underline');
       noteList.map(item => {
         this.bookRendition.annotations.remove(item.cfi, 'underline');
@@ -657,7 +657,8 @@ export default {
       this.$refs.note.style = svg.style.cssText;
       getNote(this.id).map((item, index) => {
         gArr.forEach(val => {
-          if (item.type === 'annotation' && item.cfi === val.dataset['cfiRange']) {
+          if (item.type === 'annotation' && item.cfi ===
+              val.dataset['cfiRange']) {
             let line = val.querySelectorAll('line')[val.querySelectorAll(
                 'line').length - 1];
             let left = line.x2.baseVal.value;
@@ -667,7 +668,8 @@ export default {
               top: top - 10,
               left: left,
               cTop: top - 10 - 70 + this.bookFrame.top,
-              cLeft: left % this.bookFrame.width + this.bookFrame.left - 140 + 10,
+              cLeft: left % this.bookFrame.width + this.bookFrame.left - 140 +
+                  10,
               ...item,
             });
           }
@@ -933,11 +935,7 @@ export default {
       setTimeout(() => {
         this.bookFrame = document.getElementById('book').
             getBoundingClientRect();
-        if ( !this.singlePageStatus) {
-          this.bookRendition.resize(this.bookFrame.width);
-        } else {
-          this.bookRendition.resize(630);
-        }
+        this.bookRendition.resize(this.bookFrame.width);
         this.bookRendition.display(cfi);
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -952,11 +950,9 @@ export default {
           setTimeout(() => {
             this.bookFrame = document.getElementById('book').
                 getBoundingClientRect();
-            // this.createLocations( () => {
             this.bookRendition.resize(this.bookFrame.width);
             this.toolTipsStatus = false;
             this.annotateStatus = false;
-            // })
           }, 100);
         }
       };

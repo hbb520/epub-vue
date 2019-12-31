@@ -46,7 +46,7 @@
 					</p>
 				</div>
 				<div class="book-container clearfix">
-					<div :class="singlePageStatus ? ('bookBox singlePage ' + theme) : ('bookBox ' + theme)">
+					<div ref="bookBox" :class="singlePageStatus ? ('bookBox singlePage ' + theme) : ('bookBox ' + theme)">
 						<div class="prev" @click="prev" v-if="prevStatus">
 							<i class="iconfont iconleft"></i>
 						</div>
@@ -155,7 +155,7 @@
 <style rel="stylesheet/scss" lang="scss">
 	#index-container {
 		#progress {
-			height: calc(100% - 92px);
+			height: calc(100% - 100px);
 			position: fixed;
 			top: 74px;
 			right: 30px;
@@ -192,14 +192,15 @@
 
 		.mu-appbar {
 			width: 100%;
+			height: 56px;
 			max-width: 1480px;
 			margin: 0 auto;
 			box-shadow: none;
 		}
 
 		.mu-button {
-			width: 60px;
-			height: 60px;
+			width: 56px;
+			height: 56px;
 			margin: 0 5px;
 			border-radius: 50%;
 		}

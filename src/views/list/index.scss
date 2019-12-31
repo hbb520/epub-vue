@@ -1,11 +1,13 @@
 #book-list-container {
 	width: 100%;
+	height: 100%;
 	margin: 0 auto;
 	color: #666666;
 
 	&.pcContainer {
 		.book-list-ul {
 			max-width: 1540px;
+			height: calc(100vh - 56px);
 			padding: 0 30px;
 			margin: 0 auto;
 

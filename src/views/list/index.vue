@@ -81,6 +81,10 @@
 			}
 		}
 
+		.mu-appbar{
+			height: 56px;
+		}
+
 		.mu-button-wrapper {
 			i {
 				font-size: 24px;

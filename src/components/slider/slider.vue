@@ -52,7 +52,8 @@
       },
       top: {
         get() {
-          let headerHeight = this.width < 600 ? 56 : 64;
+          let headerHeight = 56;
+          // let headerHeight = this.width < 600 ? 56 : 64;
           return this.progress * (this.height - headerHeight - 36) / 100;
         },
         set(value) {},
@@ -60,7 +61,8 @@
     },
     methods: {
       setTipTop(value) {
-        let headerHeight = this.width < 600 ? 56 : 64;
+        let headerHeight = 56;
+        // let headerHeight = this.width < 600 ? 56 : 64;
         this.tipTop = headerHeight + value * (this.height - 80 - headerHeight) / 100;
       },
       wheelHander(e) {
@@ -122,9 +124,9 @@
 <style scoped rel="stylesheet/scss" lang="scss">
 	#sliderContainer {
 		width: 21px;
-		height: calc(100vh - 64px);
+		height: calc(100vh - 56px);
 		position: absolute;
-		top: 64px;
+		top: 56px;
 		right: 20px;
 		margin: auto;
 		z-index: 1200;
