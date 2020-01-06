@@ -36,31 +36,33 @@
 						<i class="el-icon-loading"></i>
 						功能加载中...
 					</p>
-                    <span v-if="bookInfo.currentPage && bookInfo.totalPage">
-	                    {{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}
-                    </span>
+<!--                    <span v-if="bookInfo.currentPage && bookInfo.totalPage">-->
+<!--	                    {{this.bookInfo.currentPage}}/{{this.bookInfo.totalPage}}-->
+<!--                    </span>-->
+					<span v-if="currentChapter.index && bookInfo">
+								{{currentChapter.index}}/{{bookInfo.totalChapter}}</span>
 				</div>
 			</div>
 		</div>
-		<transition name="el-zoom-in-bottom">
-			<div id="progress" v-if="menuDialogStatus">
-				<div class="title clearfix">
-					<p class="wordOverflow">{{ progressTips }}</p>
-					<span v-if="progress > 0">{{ parseInt(progress) }}%</span>
-				</div>
-				<div class="sliderBox clearfix">
-					<div class="left" @click="progressPrev()">
-						<i class="iconfont iconleft"></i>
-					</div>
-					<div class="slider">
-						<el-slider v-model="progress" :show-tooltip="false" @change="onProgressChange"></el-slider>
-					</div>
-					<div class="right" @click="progressNext()">
-						<i class="iconfont iconright"></i>
-					</div>
-				</div>
-			</div>
-		</transition>
+<!--		<transition name="el-zoom-in-bottom">-->
+<!--			<div id="progress" v-if="menuDialogStatus">-->
+<!--				<div class="title clearfix">-->
+<!--					<p class="wordOverflow">{{ progressTips }}</p>-->
+<!--					<span v-if="progress > 0">{{ parseInt(progress) }}%</span>-->
+<!--				</div>-->
+<!--				<div class="sliderBox clearfix">-->
+<!--					<div class="left" @click="progressPrev()">-->
+<!--						<i class="iconfont iconleft"></i>-->
+<!--					</div>-->
+<!--					<div class="slider">-->
+<!--						<el-slider v-model="progress" :show-tooltip="false" @change="onProgressChange"></el-slider>-->
+<!--					</div>-->
+<!--					<div class="right" @click="progressNext()">-->
+<!--						<i class="iconfont iconright"></i>-->
+<!--					</div>-->
+<!--				</div>-->
+<!--			</div>-->
+<!--		</transition>-->
 		<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container"
 		           @close="dialogHandle">
 			<mobile-catalog v-if="catalogStatus" :id="id" :chapterList="chapterDetailList"

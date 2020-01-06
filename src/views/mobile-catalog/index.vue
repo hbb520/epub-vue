@@ -9,9 +9,9 @@
 		<div class="catalog-container" v-if="menu === 1">
 			<div class="list">
 				<div v-for="(item, index) in chapterList" :key="index"
-				     :class="(currentChapter.location && item.location === currentChapter.location) ? (item.isUnit ? 'chapter active unit clearfix' : 'chapter active clearfix' ) : (item.isUnit ? 'chapter unit clearfix' : 'chapter clearfix' )">
+				     :class="(currentChapter.id && item.id === currentChapter.id) ? (item.isUnit ? 'chapter active unit clearfix' : 'chapter active clearfix' ) : (item.isUnit ? 'chapter unit clearfix' : 'chapter clearfix' )">
 					<p class="wordOverflow" @click="goToChapter(item)">{{ item.label }}</p>
-					<span>{{item.location}}</span>
+					<span>{{item.index}}</span>
 				</div>
 			</div>
 		</div>
@@ -21,7 +21,7 @@
 					<p class="clearfix">
 						<span>{{ parseTime(item.createTime) }}</span>
 						<i class="iconfont icondelete" @click="delBookmarks(item.id)"></i>
-						<span>{{ book.locations.locationFromCfi(item.startCfi) }}</span>
+						<span>{{ item.index }}</span>
 					</p>
 					<p class="content wordOverflow2" @click="getoBookmarks(item.startCfi)">{{ item.word }}</p>
 				</div>
@@ -37,7 +37,7 @@
 					<p class="clearfix">
 						<span><i :class="item.underlineClass"></i>{{ parseTime(item.createTime) }}</span>
 						<i class="iconfont icondelete" @click="delNote(item.cfi)"></i>
-						<span>{{ book.locations.locationFromCfi(item.cfi) }}</span>
+						<span>{{ item.index }}</span>
 					</p>
 					<p class="content wordOverflow2" @click="getoNote(item.cfi)">{{ item.word }}</p>
 					<div class="bottom clearfix" v-if="item.type === 'annotation'">

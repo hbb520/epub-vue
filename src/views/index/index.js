@@ -35,6 +35,7 @@ export default {
         currentStartPage: null,
         currentEndPage: null,
         totalPage: null,
+        totalChapter: null,
         currentChapter: null,
       },
       prevStatus: true,
@@ -107,7 +108,7 @@ export default {
     // 图书解析渲染
     bookInit(url) {
       this.bookLoading = true;
-      this.showLoadingTip = true;
+      // this.showLoadingTip = true;
       this.book = ePub(url);
       this.bookRendition = this.book.renderTo('book', {
         width: '100%',
@@ -125,25 +126,25 @@ export default {
     // 阅读器初始化
     renderInit() {
       // 图书加载完成
-      this.book.ready.then(() => {
+      this.book.ready.then(async () => {
         this.bookLoading = false;
-        let pageWordNumber = (0.42 * this.bookFrame.width *
-            (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
-        return this.book.locations.generate(pageWordNumber);
-      }).then(async result => {
-        this.showLoadingTip = false;
+      //   let pageWordNumber = (0.42 * this.bookFrame.width *
+      //       (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
+      //   return this.book.locations.generate(pageWordNumber);
+      // }).then(async result => {
+      //   this.showLoadingTip = false;
         console.log('图书加载完成');
         console.log(this.book);
         this.getBookInfo();
         this.setBookTheme();
         // 进度条初始化
         this.progress = 0;
-        this.locations = this.bookRendition.currentLocation();
-        this.currentChapter = this.locations.start;
-        this.bookInfo.totalPage = result.length;
+        // this.locations = this.bookRendition.currentLocation();
+        // this.currentChapter = this.locations.start;
+        // this.bookInfo.totalPage = result.length;
         this.chapterDetailList = [];
         let index = 1;
-        this.book.navigation.toc.map((item, index) => {
+        this.book.navigation.toc.map(item => {
           this.chapterDetailList.push({
             index: index,
             ...item,
@@ -163,14 +164,15 @@ export default {
               }));
           index++;
         });
+        this.bookInfo.totalChapter = this.chapterDetailList.slice(-1)[0].index
 
         this.chapterDetailList = await Promise.all(
             this.chapterDetailList.map(async (item) => {
               let cfi = await this.searchChapter(item.href);
-              let location = this.book.locations.locationFromCfi(cfi);
+              // let location = this.book.locations.locationFromCfi(cfi);
               return {
                 cfi,
-                location,
+                // location,
                 ...item,
               };
             }));
@@ -184,14 +186,14 @@ export default {
         this.bookRendition.on('relocated', location => {
           console.log('页码变化');
           this.locations = location;
-          this.bookInfo.currentStartPage = location.start.location;
-          this.bookInfo.currentEndPage = location.end.location;
+          // this.bookInfo.currentStartPage = location.start.location;
+          // this.bookInfo.currentEndPage = location.end.location;
           this.progress = location.start && location.start.percentage * 100;
           this.nextStatus = location.atEnd ? false : true;
           this.prevStatus = location.atStart ? false : true;
           let current = this.chapterDetailList.filter((val, ind) => {
             return val.href.split('#')[0] === location.start.href.split('#')[0];
-          })[0];
+          }).slice(-1)[0];
           if (current) {
             let obj = {
               ...current,
@@ -220,7 +222,7 @@ export default {
           rangeObj = range.getBoundingClientRect();
           this.mouseSelectStatus = true;
           this.selectedCfi = cfiRange;
-          this.selectedLocation = this.book.locations.locationFromCfi(cfiRange);
+          // this.selectedLocation = this.book.locations.locationFromCfi(cfiRange);
           this.selectedInfo = rangeObj;
           this.toolTipsTop = rangeObj.top + this.bookFrame.top - 90 - 0.5 * fs *
               lh - 10 - this.surplusTop;
@@ -271,7 +273,7 @@ export default {
           range = this.bookRendition.getRange(cfiRange);
           rangeObj = range.getBoundingClientRect();
           this.selectedCfi = cfiRange;
-          this.selectedLocation = this.book.locations.locationFromCfi(cfiRange);
+          // this.selectedLocation = this.book.locations.locationFromCfi(cfiRange);
           this.selectedInfo = rangeObj;
           this.selectedColorClassName = object && object.className;
           this.currentHandleAnnotateWrod = object.annotation
@@ -343,10 +345,11 @@ export default {
         id: this.id + new Date().getTime(),
         bookId: this.id,
         cfi: this.selectedCfi,
-        location: this.selectedLocation,
+        // location: this.selectedLocation,
         href: this.currentChapter.href,
         word: this.currentHandleWord,
-        index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+        // index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+        index: this.currentChapter ? this.currentChapter.index : null,
         type: 'underline',  // 'underline', 'annotation'
         underlineClass: 'default',
         annotation: '',
@@ -374,10 +377,11 @@ export default {
         id: this.id + new Date().getTime(),
         bookId: this.id,
         cfi: this.selectedCfi,
-        location: this.selectedLocation,
+        // location: this.selectedLocation,
         href: this.currentChapter.href,
         word: this.currentHandleWord,
-        index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+        // index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+        index: this.currentChapter ? this.currentChapter.index : null,
         type: this.currentHandleAnnotateWrod ? 'annotation' : 'underline',  // 'underline', 'annotation'
         underlineClass: value,
         annotation: this.currentHandleAnnotateWrod,
@@ -473,10 +477,11 @@ export default {
           id: this.id + new Date().getTime(),
           bookId: this.id,
           cfi: this.selectedCfi,
-          location: this.selectedLocation,
+          // location: this.selectedLocation,
           href: this.currentChapter.href,
           word: this.currentHandleWord,
-          index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+          // index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+          index: this.currentChapter ? this.currentChapter.index : null,
           type: 'underline',  // 'underline', 'annotation'
           underlineClass: this.selectedColorClassName
               ? this.selectedColorClassName
@@ -501,10 +506,11 @@ export default {
           id: this.id + new Date().getTime(),
           bookId: this.id,
           cfi: this.selectedCfi,
-          location: this.selectedLocation,
+          // location: this.selectedLocation,
           href: this.currentChapter.href,
           word: this.currentHandleWord,
-          index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+          // index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+          index: this.currentChapter ? this.currentChapter.index : null,
           type: 'annotation',  // 'underline', 'annotation'
           underlineClass: this.selectedColorClassName
               ? this.selectedColorClassName
@@ -615,11 +621,12 @@ export default {
         }
         let rangeObj = this.getRangeRect(item.startCfi);
         let left = rangeObj.left;
-        let location = this.book.locations.locationFromCfi(item.startCfi);
-        let startLocation = this.locations.start.location;
-        let endLocation = this.locations.end.location;
-        if (left >= minLeft && left <= maxLeft && location >=
-            startLocation && location <= endLocation) {
+        // let location = this.book.locations.locationFromCfi(item.startCfi);
+        // let startLocation = this.locations.start.location;
+        // let endLocation = this.locations.end.location;
+        // if (left >= minLeft && left <= maxLeft && location >=
+        //     startLocation && location <= endLocation) {
+        if (left >= minLeft && left <= maxLeft) {
           this.bookmarksId = item.id;
           return true;
         } else {
@@ -835,7 +842,8 @@ export default {
             endCfi: objEnd.cfi,
             href: objStart.href,
             word: word,
-            index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+            // index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
+            index: this.currentChapter ? this.currentChapter.index : null,
             createTime: new Date().getTime(),
           });
           this.bookmarksId = this.id + new Date().getTime();
@@ -894,37 +902,6 @@ export default {
       await item.load(book.load.bind(book));
       const el = id ? item.document.getElementById(id) : item.document.body;
       return item.cfiFromElement(el);
-    },
-    // 重新生成locations
-    createLocations(done) {
-      let pageWordNumber, timer;
-      if (this.singlePageStatus) {
-        pageWordNumber = (0.92 * this.bookFrame.width *
-            (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
-      } else {
-        pageWordNumber = (0.42 * this.bookFrame.width *
-            (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
-      }
-      this.bookLoading = true;
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        this.book.locations.generate(pageWordNumber).then(async result => {
-          // console.log(result.length);
-          this.bookLoading = false;
-          this.bookInfo.totalPage = result.length;
-          this.chapterDetailList = await Promise.all(
-              this.chapterDetailList.map(async (item) => {
-                let cfi = await this.searchChapter(item.href);
-                let location = this.book.locations.locationFromCfi(cfi);
-                return {
-                  cfi,
-                  location,
-                  ...item,
-                };
-              }));
-          done && done();
-        });
-      }, 500);
     },
     // 设置单/双页模式
     setPageType() {

@@ -5,7 +5,8 @@
 	overflow: hidden;
 
 	.catalog-container, .bookmark-container, .note-container {
-		width: calc(100% + 17px);
+		//width: calc(100% + 17px);
+		width: 100%;
 		position: relative;
 		overflow-x: hidden;
 		overflow-y: auto;

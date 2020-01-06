@@ -60,10 +60,10 @@
 						     element-loading-background="rgba(0, 0, 0, 0.6)">
 						</div>
 						<div class="bottom">
-							<span v-if="bookInfo.currentStartPage && bookInfo.totalPage && !singlePageStatus">
-								{{this.bookInfo.currentStartPage}}/{{this.bookInfo.totalPage}}</span>
-							<span v-if="bookInfo.currentEndPage && bookInfo.totalPage">
-								{{this.bookInfo.currentEndPage}}/{{this.bookInfo.totalPage}}</span>
+							<span v-if="currentChapter.index && bookInfo && !singlePageStatus">
+								{{currentChapter.index}}/{{bookInfo.totalChapter}}</span>
+							<span v-if="currentChapter.index && bookInfo">
+								{{currentChapter.index}}/{{bookInfo.totalChapter}}</span>
 						</div>
 						<div class="next" @click="next" v-if="nextStatus">
 							<i class="iconfont iconright"></i>
@@ -74,12 +74,12 @@
 				</div>
 			</div>
 
-			<progress-slider v-if="progress !== null" :progress.sync="progress" :tips="progressTips"
-			                 @change="onProgressChange" @prev="(!drawer_open && !imgDialogStatus) && prev()"
-			                 @next="(!drawer_open && !imgDialogStatus) && next()"></progress-slider>
+<!--			<progress-slider v-if="progress !== null" :progress.sync="progress" :tips="progressTips"-->
+<!--			                 @change="onProgressChange" @prev="(!drawer_open && !imgDialogStatus) && prev()"-->
+<!--			                 @next="(!drawer_open && !imgDialogStatus) && next()"></progress-slider>-->
 			<mu-drawer :open.sync="drawer_open" :docked="false" :right="true" class="drawer-container"
 			           @close="dialogHandle">
-				<catalog v-if="catalogStatus" :id="id" :book='book' :chapterList="chapterDetailList"
+				<catalog v-if="catalogStatus" :id="id" :chapterList="chapterDetailList"
 				         :currentChapter="currentChapter"
 				         @closeDialog="dialogHandle" @goToChapter="goToChapter"
 				         @gotoBookmarks="gotoBookmarks" @gotoNote="gotoBookmarks"
