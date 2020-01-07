@@ -180,6 +180,7 @@ export default {
           console.log('章节变化');
           this.noteChange(null, section.href);
         });
+
         // 页码变化
         this.bookRendition.on('relocated', location => {
           console.log('页码变化');
