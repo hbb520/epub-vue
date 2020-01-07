@@ -128,11 +128,11 @@ export default {
       // 图书加载完成
       this.book.ready.then(async () => {
         this.bookLoading = false;
-      //   let pageWordNumber = (0.42 * this.bookFrame.width *
-      //       (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
-      //   return this.book.locations.generate(pageWordNumber);
-      // }).then(async result => {
-      //   this.showLoadingTip = false;
+        //   let pageWordNumber = (0.42 * this.bookFrame.width *
+        //       (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
+        //   return this.book.locations.generate(pageWordNumber);
+        // }).then(async result => {
+        //   this.showLoadingTip = false;
         console.log('图书加载完成');
         console.log(this.book);
         this.getBookInfo();
@@ -164,7 +164,7 @@ export default {
               }));
           index++;
         });
-        this.bookInfo.totalChapter = this.chapterDetailList.slice(-1)[0].index
+        this.bookInfo.totalChapter = this.chapterDetailList.slice(-1)[0].index;
 
         this.chapterDetailList = await Promise.all(
             this.chapterDetailList.map(async (item) => {
@@ -346,7 +346,7 @@ export default {
         bookId: this.id,
         cfi: this.selectedCfi,
         // location: this.selectedLocation,
-        href: this.currentChapter.href,
+        // href: this.currentChapter.chapterHref,
         word: this.currentHandleWord,
         // index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
         index: this.currentChapter ? this.currentChapter.index : null,
@@ -378,7 +378,7 @@ export default {
         bookId: this.id,
         cfi: this.selectedCfi,
         // location: this.selectedLocation,
-        href: this.currentChapter.href,
+        href: this.currentChapter.chapterHref,
         word: this.currentHandleWord,
         // index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
         index: this.currentChapter ? this.currentChapter.index : null,
@@ -478,7 +478,7 @@ export default {
           bookId: this.id,
           cfi: this.selectedCfi,
           // location: this.selectedLocation,
-          href: this.currentChapter.href,
+          // href: this.currentChapter.chapterHref,
           word: this.currentHandleWord,
           // index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
           index: this.currentChapter ? this.currentChapter.index : null,
@@ -507,7 +507,7 @@ export default {
           bookId: this.id,
           cfi: this.selectedCfi,
           // location: this.selectedLocation,
-          href: this.currentChapter.href,
+          // href: this.currentChapter.chapterHref,
           word: this.currentHandleWord,
           // index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
           index: this.currentChapter ? this.currentChapter.index : null,
@@ -637,52 +637,58 @@ export default {
     // 页面变化笔记回显
     noteChange(cfi, href) {
       let noteList = getNote(this.id);
-      let cfiHref = href || this.currentChapter.href;
+      // let cfiHref = href || this.currentChapter.chapterHref;
       cfi && this.bookRendition.annotations.remove(cfi, 'underline');
       noteList.map(item => {
         this.bookRendition.annotations.remove(item.cfi, 'underline');
       });
       this.noteTipsList = [];
       this.toolTipsList = [];
-      noteList.filter((item, index) => {
-        return item.href.split('#')[0] === cfiHref.split('#')[0];
-      }).map((item, index) => {
-        this.toolTipsList.push(item.cfi);
-        this.bookRendition.annotations.add('underline', item.cfi, {
-          cfiRange: item.cfi,
-          className: item.underlineClass,
-          annotation: item.annotation,
-        }, () => {}, item.underlineClass, {});
-        this.createAnnotationDom();
-      });
+      // console.log(cfiHref.split('#')[0])
+      // console.log(noteList)
+      noteList
+      // .filter((item, index) => {
+      //   return item.href === cfiHref.split('#')[0];
+      // })
+          .map((item, index) => {
+            this.toolTipsList.push(item.cfi);
+            this.bookRendition.annotations.add('underline', item.cfi, {
+              cfiRange: item.cfi,
+              className: item.underlineClass,
+              annotation: item.annotation,
+            }, () => {}, item.underlineClass, {});
+            this.createAnnotationDom();
+          });
     },
     // 创建批注dom
     createAnnotationDom() {
       let svg = document.querySelector('svg');
       let gArr = document.querySelectorAll('svg g');
       let container = document.querySelector('.epub-view');
-      this.$refs.note.style = svg.style.cssText;
-      getNote(this.id).map((item, index) => {
-        gArr.forEach(val => {
-          if (item.type === 'annotation' && item.cfi ===
-              val.dataset['cfiRange']) {
-            let line = val.querySelectorAll('line')[val.querySelectorAll(
-                'line').length - 1];
-            let left = line.x2.baseVal.value;
-            let top = line.y2.baseVal.value;
-            this.noteTipsList.push({
-              isShowed: false,
-              top: top - 10,
-              left: left,
-              cTop: top - 10 - 70 + this.bookFrame.top,
-              cLeft: left % this.bookFrame.width + this.bookFrame.left - 140 +
-                  10,
-              ...item,
-            });
-          }
+      if (svg) {
+        this.$refs.note.style = svg.style.cssText;
+        getNote(this.id).map((item, index) => {
+          gArr.forEach(val => {
+            if (item.type === 'annotation' && item.cfi ===
+                val.dataset['cfiRange']) {
+              let line = val.querySelectorAll('line')[val.querySelectorAll(
+                  'line').length - 1];
+              let left = line.x2.baseVal.value;
+              let top = line.y2.baseVal.value;
+              this.noteTipsList.push({
+                isShowed: false,
+                top: top - 10,
+                left: left,
+                cTop: top - 10 - 70 + this.bookFrame.top,
+                cLeft: left % this.bookFrame.width + this.bookFrame.left - 140 +
+                    10,
+                ...item,
+              });
+            }
+          });
         });
-      });
-      container.appendChild(this.$refs.note);
+        container.appendChild(this.$refs.note);
+      }
     },
     // 获取图书信息
     getBookInfo() {
@@ -718,7 +724,7 @@ export default {
     setFont(value) {
       this.themes.font(value);
       setLS('fontFamily', value);
-      this.bookmarksChange();
+      // this.bookmarksChange();
       this.noteChange();
       this.bookRendition.display(this.locations.start.cfi);
     },
