@@ -128,7 +128,7 @@ export default {
       this.book.ready.then(() => {
         this.bookLoading = false;
         let pageWordNumber = (0.42 * this.bookFrame.width *
-            (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
+          (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
         return this.book.locations.generate(pageWordNumber);
       }).then(async result => {
         this.showLoadingTip = false;
@@ -150,30 +150,30 @@ export default {
           });
           item.subitems.length > 0 && index--;
           this.chapterDetailList = this.chapterDetailList.concat(
-              item.subitems.map(val => {
-                index++;
-                return {
-                  isUnit: true,
-                  index: index,
-                  parentChapterHref: item.href,
-                  parentChapterLabel: item.label,
-                  fristChapterHref: val.href.split('#')[0],
-                  ...val,
-                };
-              }));
+            item.subitems.map(val => {
+              index++;
+              return {
+                isUnit: true,
+                index: index,
+                parentChapterHref: item.href,
+                parentChapterLabel: item.label,
+                fristChapterHref: val.href.split('#')[0],
+                ...val,
+              };
+            }));
           index++;
         });
 
         this.chapterDetailList = await Promise.all(
-            this.chapterDetailList.map(async (item) => {
-              let cfi = await this.searchChapter(item.href);
-              let location = this.book.locations.locationFromCfi(cfi);
-              return {
-                cfi,
-                location,
-                ...item,
-              };
-            }));
+          this.chapterDetailList.map(async (item) => {
+            let cfi = await this.searchChapter(item.href);
+            let location = this.book.locations.locationFromCfi(cfi);
+            return {
+              cfi,
+              location,
+              ...item,
+            };
+          }));
 
         // 章节变化
         this.bookRendition.on('rendered', (section) => {
@@ -200,8 +200,8 @@ export default {
             obj.index = current.index;
             this.currentChapter = obj;
             this.bookInfo.currentChapter = current.parentChapterLabel
-                ? (current.parentChapterLabel + ' - ' + current.label)
-                : current.label;
+              ? (current.parentChapterLabel + ' - ' + current.label)
+              : current.label;
             this.progressTips = this.bookInfo.currentChapter;
           }
           this.bookmarksChange();
@@ -216,7 +216,7 @@ export default {
         // 选中文字
         this.bookRendition.on('selected', (cfiRange, contents) => {
           let range, rangeObj, fs = parseInt(getLS('fontSize')),
-              lh = parseInt(getLS('lineHeight') * 10) / 10;
+            lh = parseInt(getLS('lineHeight') * 10) / 10;
           range = this.bookRendition.getRange(cfiRange);
           rangeObj = range.getBoundingClientRect();
           this.mouseSelectStatus = true;
@@ -224,9 +224,9 @@ export default {
           this.selectedLocation = this.book.locations.locationFromCfi(cfiRange);
           this.selectedInfo = rangeObj;
           this.toolTipsTop = rangeObj.top + this.bookFrame.top - 90 - 0.5 * fs *
-              lh - 10 - this.surplusTop;
+            lh - 10 - this.surplusTop;
           this.toolTipsLeft = rangeObj.left % this.bookFrame.width +
-              this.bookFrame.left + rangeObj.width / 2 - 150;
+            this.bookFrame.left + rangeObj.width / 2 - 150;
           this.toolTipsStatus = true;
           this.toolTipsMode = 'add';
           this.currentHandleWord = range.toString();
@@ -265,10 +265,10 @@ export default {
         // 点击选中文字
         this.bookRendition.on('markClicked', (cfiRange, object, contents) => {
           let range, rangeObj, fs = parseInt(getLS('fontSize')),
-              lh = parseInt(getLS('lineHeight') * 10) / 10;
+            lh = parseInt(getLS('lineHeight') * 10) / 10;
           let paragraphWidth = this.singlePageStatus
-              ? this.bookFrame.width
-              : 0.42 * this.bookFrame.width;
+            ? this.bookFrame.width
+            : 0.42 * this.bookFrame.width;
           range = this.bookRendition.getRange(cfiRange);
           rangeObj = range.getBoundingClientRect();
           this.selectedCfi = cfiRange;
@@ -276,22 +276,22 @@ export default {
           this.selectedInfo = rangeObj;
           this.selectedColorClassName = object && object.className;
           this.currentHandleAnnotateWrod = object.annotation
-              ? object.annotation
-              : null;
+            ? object.annotation
+            : null;
           if (rangeObj.width > paragraphWidth) {
             let fristWordCfi = cfiRange.split(',/1:')[0] + ',/1:' +
-                cfiRange.split(',/1:')[1] + ',/1:' +
-                (parseInt(cfiRange.split(',/1:')[1]) + 1) + ')';
+              cfiRange.split(',/1:')[1] + ',/1:' +
+              (parseInt(cfiRange.split(',/1:')[1]) + 1) + ')';
             let fristWordRangeObj = this.getRangeRect(fristWordCfi);
             this.toolTipsTop = fristWordRangeObj.top + this.bookFrame.top - 90 -
-                0.5 * fs * lh - 10 - this.surplusTop;
+              0.5 * fs * lh - 10 - this.surplusTop;
             this.toolTipsLeft = rangeObj.left % this.bookFrame.width +
-                this.bookFrame.left - 150;
+              this.bookFrame.left - 150;
           } else {
             this.toolTipsTop = rangeObj.top + this.bookFrame.top - 90 - 0.5 *
-                fs * lh - 10 - this.surplusTop;
+              fs * lh - 10 - this.surplusTop;
             this.toolTipsLeft = rangeObj.left % this.bookFrame.width +
-                this.bookFrame.left + rangeObj.width / 2 - 150;
+              this.bookFrame.left + rangeObj.width / 2 - 150;
           }
           this.noteTipsList.map(item => {
             item.isShowed = false;
@@ -314,7 +314,7 @@ export default {
       oInput.style.display = 'none';
       document.body.removeChild(oInput);
       this.bookRendition.getContents(
-          this.selectedCfi)[0].document.getSelection().empty();
+        this.selectedCfi)[0].document.getSelection().empty();
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -325,7 +325,7 @@ export default {
     // 分享
     share() {
       this.bookRendition.getContents(
-          this.selectedCfi)[0].document.getSelection().empty();
+        this.selectedCfi)[0].document.getSelection().empty();
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
         this.annotateStatus = false;
@@ -354,7 +354,7 @@ export default {
         createTime: new Date().getTime(),
       });
       this.bookRendition.getContents(
-          this.selectedCfi)[0].document.getSelection().empty();
+        this.selectedCfi)[0].document.getSelection().empty();
       this.noteChange();
       if (this.toolTipsStatus || this.annotateStatus) {
         this.toolTipsStatus = false;
@@ -426,21 +426,21 @@ export default {
       if ((top + 270) > document.body.clientHeight) {
         this.annotateShowAtTheBottom = false;
         if (this.selectedInfo.height + this.bookFrame.bottom + 270 >
-            document.body.clientHeight) {
+          document.body.clientHeight) {
           this.annotateTop = document.body.clientHeight - 270;
           this.annotateLeft = document.body.clientWidth - 500 - 41;
         } else {
           this.annotateTop = top - 270 - this.selectedInfo.height - 20;
           this.annotateLeft = (this.selectedInfo.left - left) %
-              this.bookFrame.width + this.bookFrame.left +
-              this.selectedInfo.width / 2 - 250;
+            this.bookFrame.width + this.bookFrame.left +
+            this.selectedInfo.width / 2 - 250;
         }
       } else {
         this.annotateShowAtTheBottom = true;
         this.annotateTop = top;
         this.annotateLeft = (this.selectedInfo.left - left) %
-            this.bookFrame.width + this.bookFrame.left +
-            this.selectedInfo.width / 2 - 250;
+          this.bookFrame.width + this.bookFrame.left +
+          this.selectedInfo.width / 2 - 250;
       }
       this.annotateStatus = true;
       this.annotateWord = this.currentHandleAnnotateWrod;
@@ -480,8 +480,8 @@ export default {
           index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
           type: 'underline',  // 'underline', 'annotation'
           underlineClass: this.selectedColorClassName
-              ? this.selectedColorClassName
-              : 'default',
+            ? this.selectedColorClassName
+            : 'default',
           annotation: null,
           createTime: new Date().getTime(),
         });
@@ -492,12 +492,12 @@ export default {
         this.bookRendition.annotations.add('underline', this.selectedCfi, {
           cfiRange: this.selectedCfi,
           className: this.selectedColorClassName
-              ? this.selectedColorClassName
-              : 'default',
+            ? this.selectedColorClassName
+            : 'default',
           annotation: this.annotateWord,
         }, () => {}, this.selectedColorClassName
-            ? this.selectedColorClassName
-            : 'default', {});
+          ? this.selectedColorClassName
+          : 'default', {});
         setNote(this.id, {
           id: this.id + new Date().getTime(),
           bookId: this.id,
@@ -508,8 +508,8 @@ export default {
           index: this.bookInfo.currentPage ? this.bookInfo.currentPage : null,
           type: 'annotation',  // 'underline', 'annotation'
           underlineClass: this.selectedColorClassName
-              ? this.selectedColorClassName
-              : 'default',
+            ? this.selectedColorClassName
+            : 'default',
           annotation: this.annotateWord,
           createTime: new Date().getTime(),
         });
@@ -524,8 +524,8 @@ export default {
     // 获取批注标记坐标
     getNoteTipsPosition(cfi) {
       let left, top, range, otherRange, rangeObj, otherRangeObj,
-          fs = parseInt(getLS('fontSize')),
-          lh = parseInt(getLS('lineHeight') * 10) / 10;
+        fs = parseInt(getLS('fontSize')),
+        lh = parseInt(getLS('lineHeight') * 10) / 10;
       range = this.getRange(cfi);
       if ( !range) {
         return true;
@@ -535,14 +535,14 @@ export default {
       rangeObj = range.getBoundingClientRect();
       otherRangeObj = otherRange.getBoundingClientRect();
       top = otherRangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
-          this.surplusTop;
+        this.surplusTop;
       left = otherRangeObj.left % this.bookFrame.width + this.bookFrame.left;
       if (this.singlePageStatus) {
         if (Math.abs(otherRangeObj.left % this.bookFrame.width - 0.04 *
-            this.bookFrame.width) < 10) {
+          this.bookFrame.width) < 10) {
           if (otherRangeObj.top <= (3 * lh / 0.4 + fs - 6)) {
             top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
-                this.surplusTop + rangeObj.height - fs * lh - 2;
+              this.surplusTop + rangeObj.height - fs * lh - 2;
             left = left + 0.92 * this.bookFrame.width - 5;
           } else {
             top = top - fs * lh;
@@ -551,18 +551,18 @@ export default {
         }
       } else {
         if (Math.abs(otherRangeObj.left % this.bookFrame.width - 0.04 *
-            this.bookFrame.width) < 10
-            || Math.abs(otherRangeObj.left % this.bookFrame.width - 0.54 *
-                this.bookFrame.width) < 10) {
+          this.bookFrame.width) < 10
+          || Math.abs(otherRangeObj.left % this.bookFrame.width - 0.54 *
+            this.bookFrame.width) < 10) {
           if (otherRangeObj.top <= (3 * lh / 0.4 + fs - 6)) {
             if (Math.abs(otherRangeObj.left % this.bookFrame.width - 0.04 *
-                this.bookFrame.width) < 10) {
+              this.bookFrame.width) < 10) {
               top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
-                  this.surplusTop + rangeObj.height - fs * lh - 2;
+                this.surplusTop + rangeObj.height - fs * lh - 2;
               left = left + 0.92 * this.bookFrame.width - 5;
             } else {
               top = rangeObj.top + this.bookFrame.top + fs * 1.2 + 11 -
-                  this.surplusTop + rangeObj.height - fs * lh - 2;
+                this.surplusTop + rangeObj.height - fs * lh - 2;
               left = left - 0.08 * this.bookFrame.width - 3;
             }
           } else {
@@ -573,7 +573,7 @@ export default {
       }
       let extraTop, extraLeft;
       if (getLS('fontFamily') === 'MicrosoftYaHei' || getLS('fontFamily') ===
-          'PingFangSC-Regular, sans-serif') {
+        'PingFangSC-Regular, sans-serif') {
         extraTop = 0;
       } else {
         extraTop = -5;
@@ -603,11 +603,11 @@ export default {
       let minLeft, maxLeft, page = this.locations.start.displayed.page;
       if (this.singlePageStatus) {
         minLeft = this.bookFrame.width * (page - 1) + 0.04 *
-            this.bookFrame.width;
+          this.bookFrame.width;
         maxLeft = minLeft + 0.92 * this.bookFrame.width;
       } else {
         minLeft = this.bookFrame.width * (page - 1) / 2 + 0.04 *
-            this.bookFrame.width;
+          this.bookFrame.width;
         maxLeft = minLeft + 0.92 * this.bookFrame.width;
       }
       this.bookmarksStatus = getBookmarks(this.id).some(item => {
@@ -620,7 +620,7 @@ export default {
         let startLocation = this.locations.start.location;
         let endLocation = this.locations.end.location;
         if (left >= minLeft && left <= maxLeft && location >=
-            startLocation && location <= endLocation) {
+          startLocation && location <= endLocation) {
           this.bookmarksId = item.id;
           return true;
         } else {
@@ -659,9 +659,9 @@ export default {
       getNote(this.id).map((item, index) => {
         gArr.forEach(val => {
           if (item.type === 'annotation' && item.cfi ===
-              val.dataset['cfiRange']) {
+            val.dataset['cfiRange']) {
             let line = val.querySelectorAll('line')[val.querySelectorAll(
-                'line').length - 1];
+              'line').length - 1];
             let left = line.x2.baseVal.value;
             let top = line.y2.baseVal.value;
             this.noteTipsList.push({
@@ -670,7 +670,7 @@ export default {
               left: left,
               cTop: top - 10 - 70 + this.bookFrame.top,
               cLeft: left % this.bookFrame.width + this.bookFrame.left - 140 +
-                  10,
+                10,
               ...item,
             });
           }
@@ -785,7 +785,7 @@ export default {
     onProgressChange(progress) {
       const percentage = progress / 100;
       const location = progress > 0 ? this.book.locations.cfiFromPercentage(
-          percentage) : 0;
+        percentage) : 0;
       this.bookRendition.display(location);
     },
     prev() {
@@ -822,7 +822,7 @@ export default {
         let objStart = this.locations && this.locations.start;
         let objEnd = this.locations && this.locations.end;
         let content = this.getRange(objStart.cfi) &&
-            this.getRange(objStart.cfi).commonAncestorContainer;
+          this.getRange(objStart.cfi).commonAncestorContainer;
         let word = content && content.data;
         let isSign = word.split(' ').some(val => val === '\n');
         let baseUrl = objStart.cfi.split('!')[0];
@@ -868,14 +868,14 @@ export default {
     search(value, done) {
       let book = this.book;
       Promise.all(book.spine.spineItems.map(item => {
-            return new Promise((resolve, reject) => {
-              item.load(book.load.bind(book)).then(result => {
-                resolve(item.find.bind(item, value));
-              }).catch(results => {
-                item.unload.bind(item);
-              });
+          return new Promise((resolve, reject) => {
+            item.load(book.load.bind(book)).then(result => {
+              resolve(item.find.bind(item, value));
+            }).catch(results => {
+              item.unload.bind(item);
             });
-          }),
+          });
+        }),
       ).then(results => {
         Promise.all(results).then(results => {
           this.searchResult = results.map(item => {
@@ -901,10 +901,10 @@ export default {
       let pageWordNumber, timer;
       if (this.singlePageStatus) {
         pageWordNumber = (0.92 * this.bookFrame.width *
-            (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
+          (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
       } else {
         pageWordNumber = (0.42 * this.bookFrame.width *
-            (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
+          (this.bookFrame.height - 40)) / (this.fs * this.fs * this.lh);
       }
       this.bookLoading = true;
       clearTimeout(timer);
@@ -914,15 +914,15 @@ export default {
           this.bookLoading = false;
           this.bookInfo.totalPage = result.length;
           this.chapterDetailList = await Promise.all(
-              this.chapterDetailList.map(async (item) => {
-                let cfi = await this.searchChapter(item.href);
-                let location = this.book.locations.locationFromCfi(cfi);
-                return {
-                  cfi,
-                  location,
-                  ...item,
-                };
-              }));
+            this.chapterDetailList.map(async (item) => {
+              let cfi = await this.searchChapter(item.href);
+              let location = this.book.locations.locationFromCfi(cfi);
+              return {
+                cfi,
+                location,
+                ...item,
+              };
+            }));
           done && done();
         });
       }, 500);
@@ -935,7 +935,7 @@ export default {
       this.surplusTop = 21;
       setTimeout(() => {
         this.bookFrame = document.getElementById('book').
-            getBoundingClientRect();
+        getBoundingClientRect();
         this.bookRendition.resize(this.bookFrame.width);
         this.bookRendition.display(cfi);
         this.toolTipsStatus = false;
@@ -950,7 +950,7 @@ export default {
         if (document.body.clientWidth >= 1200) {
           setTimeout(() => {
             this.bookFrame = document.getElementById('book').
-                getBoundingClientRect();
+            getBoundingClientRect();
             this.bookRendition.resize(this.bookFrame.width);
             this.toolTipsStatus = false;
             this.annotateStatus = false;
@@ -1042,4 +1042,3 @@ export default {
     },
   },
 };
-
