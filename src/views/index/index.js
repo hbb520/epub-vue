@@ -726,7 +726,7 @@ export default {
       this.themes.fontSize(value + 'px');
       // this.createLocations(() => {
       setLS('fontSize', value);
-      this.bookmarksChange();
+      // this.bookmarksChange();
       this.noteChange();
       this.bookRendition.display(this.locations.start.cfi);
       // });
@@ -736,7 +736,7 @@ export default {
       this.themes.select(bg);
       // this.createLocations( () => {
       setLS('lineHeight', value);
-      this.bookmarksChange();
+      // this.bookmarksChange();
       this.noteChange();
       this.bookRendition.display(this.locations.start.cfi);
       // })
