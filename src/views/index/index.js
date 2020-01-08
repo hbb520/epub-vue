@@ -192,7 +192,13 @@ export default {
           this.nextStatus = location.atEnd ? false : true;
           this.prevStatus = location.atStart ? false : true;
           let current = this.chapterDetailList.filter((val, ind) => {
-            return val.href.split('#')[0] === location.start.href.split('#')[0];
+            let num = parseInt(
+                location.start.href.split('#')[0].split('.xhtml')[0].split(
+                    'Text/part')[1]);
+            let chapterNum = parseInt(
+                val.href.split('#')[0].split('.xhtml')[0].split(
+                    'Text/part')[1]);
+            return num > 0 && num >= chapterNum;
           }).slice(-1)[0];
           if (current) {
             let obj = {
