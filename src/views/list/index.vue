@@ -13,7 +13,7 @@
 			<ul class="clearfix">
 				<li class="item" v-for="(item, index) in bookList" :key="index">
 					<div class="img-box" @click="$goLink(isPhoneClient ? '/mobileIndex' : '/index',
-				{'id': item.id, 'epub': item.path})">
+				{'id': item.id, 'epub': 'http://120.25.249.22:8094/' + item.path})">
 						<div class="img" :class="item.cover ? '' : 'nocover'" :style="{'backgroundImage':
 					item.cover ? ('url(' + item.cover +')'): 'none' }"></div>
 					</div>

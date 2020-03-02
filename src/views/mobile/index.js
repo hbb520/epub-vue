@@ -95,7 +95,7 @@ export default {
       this.id = parseInt(this.$route.query.id);
       this.token = this.$route.query.token || null;
       this.resourceId = this.$route.query.resourceId || null;
-      this.bookUrl = 'http://120.25.249.22:8094/' + this.$route.query.path;
+      this.bookUrl = this.$route.query.epub;
       this.getBookUrl(this.bookUrl);
     }
   },
@@ -181,8 +181,8 @@ export default {
         // 章节变化
         this.bookRendition.on('rendered', (section) => {
           console.log('章节变化');
-          let link = this.bookRendition.getContents()[0].content.getElementsByTagName(
-              'a');
+          let link = this.bookRendition.getContents()[0] ? this.bookRendition.getContents()[0].content.getElementsByTagName(
+              'a') : []
           if (link.length > 0) {
             for (let i = 0; i < link.length; i++) {
               link[i].addEventListener('click', (e) => {
