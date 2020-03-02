@@ -91,7 +91,7 @@ export default {
     MobileSearch,
   },
   mounted() {
-    if (this.$route.query && this.$route.query.id && this.$route.query.epub) {
+    if (this.$route.query && this.$route.query.epub) {
       this.id = parseInt(this.$route.query.id);
       this.token = this.$route.query.token || null;
       this.resourceId = this.$route.query.resourceId || null;
