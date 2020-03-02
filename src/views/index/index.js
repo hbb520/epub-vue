@@ -13,12 +13,16 @@ import {
   removeBookmarks,
 } from '../../utils/auth';
 
+import {getUrl, addErrorRecord} from './service';
+
 const ePub = window.ePub;
 
 export default {
   data() {
     return {
       id: null,
+      token: null,
+      resourceId: null,
       bookLoading: false,
       showLoadingTip: false,
       file: null,
@@ -89,9 +93,11 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      if (this.$route.query && this.$route.query.id && this.$route.query.path) {
+      if (this.$route.query && this.$route.query.id && this.$route.query.epub) {
         this.id = parseInt(this.$route.query.id);
-        this.bookUrl = 'http://120.25.249.22:8094/' + this.$route.query.path;
+        this.token = this.$route.query.token || null;
+        this.resourceId = this.$route.query.resourceId || null;
+        this.bookUrl = 'http://120.25.249.22:8094/' + this.$route.query.epub;
         this.getBookUrl(this.bookUrl);
         document.body.addEventListener('keyup', this.handleKeyup);
       }
@@ -134,7 +140,6 @@ export default {
         // }).then(async result => {
         //   this.showLoadingTip = false;
         console.log('图书加载完成');
-        console.log(this.book);
         this.getBookInfo();
         this.setBookTheme();
         // 进度条初始化
@@ -180,6 +185,18 @@ export default {
         // 章节变化
         this.bookRendition.on('rendered', (section) => {
           console.log('章节变化');
+          let link = this.bookRendition.getContents()[0].content.getElementsByTagName(
+              'a');
+          if (link.length > 0) {
+            for (let i = 0; i < link.length; i++) {
+              link[i].addEventListener('click', (e) => {
+                e.preventDefault();
+                if (e.target.href.indexOf('experimenturl:') === 0) {
+                  this.replaceUrl(e.target.href.split('experimenturl:')[1]);
+                }
+              }, false);
+            }
+          }
           this.noteChange(null, section.href);
         });
         // 页码变化
@@ -1027,6 +1044,35 @@ export default {
       } else {
         return false;
       }
+    },
+    // 获取真实url
+    replaceUrl(url) {
+      const params = {
+        'resourceId': this.resourceId,
+        'courseUrl': url,
+      };
+      getUrl(params, this.token).then(res => {
+        if (res && res.code === '0' && res.data) {
+          window.open(res.data.experimentUrl);
+        } else if (res && res.code === '1') {
+          this.$message.error(res.msg);
+          this.recordError(url, res.code, JSON.stringify(res))
+        }
+      }, error => {
+        this.$message.error(error);
+      });
+    },
+    // 记录错误
+    recordError(url, code, str) {
+      const params = {
+        'experimentUrl': url,
+        'failCode': code,
+        'resultStr': str,
+      }
+      addErrorRecord(params, this.token).then(res => {
+      }, error => {
+        this.$message.error(error);
+      });
     },
   },
 };
