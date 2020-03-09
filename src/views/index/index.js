@@ -190,8 +190,9 @@ export default {
           if (link.length > 0) {
             for (let i = 0; i < link.length; i++) {
               link[i].addEventListener('click', (e) => {
-                e.preventDefault();
+                // e.preventDefault();
                 if (e.target.href.indexOf('experimenturl:') === 0) {
+                  e.preventDefault();
                   this.replaceUrl(e.target.href.split('experimenturl:')[1]);
                 }
               }, false);
